@@ -1,0 +1,6 @@
+- make sure all eta labels are displaying properly (emma)
+- use web plot digitizer to extract data from Figure 10 of ECCE note (use red curve, SG) (emma)
+- exclude high eta by # of events (bea)
+- examine what is happening for 1.5 < eta < 2 (both)
+- make title and lable sizes bigger (emma)
+- add a legend (emma)
