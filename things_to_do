@@ -16,6 +16,6 @@ added insert.h
 change lines 123 and 125 to be 10 (not 14)
 line 158 change &dp_p[i]+j --> dp_p[j]
 switch i and j in line 158
-line 151 -> *max*0.5
+line 154 -> *max*0.5
 move max element calculation into for loop at line 157
 make all c1's c15's
