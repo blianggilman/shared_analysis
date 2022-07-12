@@ -7,3 +7,9 @@
 
 - maybe add plots of dp/p vs eta in bins of pt
 - maybe add header file that holds variables
+
+
+changed:
+added header file (lines 7-10)
+added .gitignore
+added insert.h
