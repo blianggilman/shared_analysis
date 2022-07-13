@@ -4,10 +4,10 @@
 #include <vector>
 using namespace std;
 
+#include "insert.h"
+
 
 //Global Variables
-TFile *file = new TFile("/project/projectdirs/m3763/blianggi/out_ECCE/60218804/tracking_output/ALL_G4EICDetector_g4tracking_eval.root");
-// TFile *file = new TFile("/project/projectdirs/m3763/blianggi/out_ECCE/60218804/tracking_output/G4EICDetector_1_g4tracking_eval.root");
 TTree *tree = (TTree*) file->Get("tracks");
 
 float gpx, gpy, gpz, px, py, pz;
@@ -120,9 +120,9 @@ double* calculatePWGreqs(int i, double p[]){
     double A[] = {0.1, 0.1, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.1, 0.1};
     double B[] = {0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 1., 1., 1., 2., 2.};
     double* dp_p = 0;
-    dp_p = new double[14];
+    dp_p = new double[10];
     
-    for (int j=0; j<14; j++){
+    for (int j=0; j<10; j++){
         double sum = pow(A[i]*p[j],2) + pow(B[i],2);
         dp_p[j] = sqrt(sum);
     }
@@ -149,28 +149,39 @@ void plotSD(Double_t** st_dev, Double_t** st_dev_direct){
     for (int i=0; i<14; i++) {
         double* dp_p = calculatePWGreqs(i, p);
         double* max;
-        max = max_element(&dp_p[i], &dp_p[i]+10);
 
-        double width = 16.;
-        double height = *max;
         cout << "terms in dp/p: ";
         for (int j=0; j<10; j++){
-            cout << &dp_p[i]+j << " ";
+            // max = max_element(dp_p[0], dp_p[j]+10);
+            cout << dp_p[j] << " ";
         }
-        cout << "MAXIMUM!!!! " << *max << ", " << height << endl;
+
+        double width = 16.;
+        double height = (dp_p[0]+dp_p[9])/2;
         etalabels[i] = new TLatex(width,height,etabins[i]);
+        cout << "MAXIMUM!!!! " << *max << ", " << height << endl;
+
         // cout << "eta label " << i << ": " << etalabels[i] << endl;
 
     }
 
 
     //fill graphs and plot, also get PWG requirements
-    TCanvas *c1 = new TCanvas("c1","c1",1200,900);
-    c1->Divide(3,5);
+    TCanvas *c15 = new TCanvas("c15","c15",1200,900);
+
+    //if the first p bin in each eta range has less than 100 events, exclude that eta range
+    int canvas_ctr = 0;
+    for (int i=0; i<14; i++){
+        if (mom_res_hists[i][0]->GetEntries() > 100) canvas_ctr++;
+    }
+    if (canvas_ctr <= 12) c15->Divide(3,4);
+    else c15->Divide(3,5);
     
-    for(int i=0; i<14; i++){
+    for(int i=0; i<14; i++){ //CHANGE UPPER BOUND TO CANVAS_CTR
         // cout << "iteration: " << i << endl;
         // cout << st_dev[1][1] << ", " << st_dev[5][5] << endl;
+
+        if (i==0 || i==13) continue;
 
         //convert st dev's into percentages
         for (int j=0; j<10; j++){
@@ -184,7 +195,7 @@ void plotSD(Double_t** st_dev, Double_t** st_dev_direct){
         double* dp_p = calculatePWGreqs(i, p);
         pwg_req_eqs[i] = new TGraph(n,p,dp_p);
 
-        c1->cd(i+1);
+        c15->cd(i); //CHANGED FROM ORIGINAL i+1
         TMultiGraph *mg = new TMultiGraph();
         mg->Add(momPlots_by_eta[i]);
         mg->Add(pwg_req_eqs[i]);
@@ -208,7 +219,7 @@ void plotSD(Double_t** st_dev, Double_t** st_dev_direct){
 
     }
 
-    c1->Print("plots/mom_res_SD_by_eta.pdf");
+    c15->Print("plots/mom_res_SD_by_eta.pdf");
 
 
 }
