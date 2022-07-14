@@ -27,6 +27,10 @@ vector<vector<TH1F*>> mom_res_preliminary_hists(14);
 vector<vector<TH1F*>> mom_res_hists(14);
 vector<vector<TH1F*>> mom_res_hists_direct(14);
 
+int canvas_ctr = 0;
+// int num_eta_bins = 14;
+// int num_pt_bins = 10;
+
 void initializeHists(){
     for (int i=0; i<14; i++){
         mom_res_preliminary_hists[i] = vector<TH1F*>(10);
@@ -36,8 +40,6 @@ void initializeHists(){
         for(int j=0; j<10; j++){
             // cout << "iteration: " << i << ", " << j << endl;
 
-            // char title[] = ("mom_res_eta%c-%c_p%d-%d", etachars[i], etachars[i+1], j*2, j*2+2);
-            // char label[] = (";dp/p, %d < #eta < %d, %d < p < %d", etavals[i], etavals[i+1], j*2, j*2+2);
             char title[1024];
             sprintf(title, "mom_res_eta%s-%s_p%d-%d", etachars[i], etachars[i+1], j*2, j*2+2);
             char label[1024];
@@ -137,10 +139,12 @@ void plotSD(Double_t** st_dev, Double_t** st_dev_direct){
     
     //initialize array of TGraphs
     std::vector<TGraph*> pwg_req_eqs(14);
+    std::vector<TGraph*> momPlots_by_p(14);
+    std::vector<TGraph*> momPlots_by_p_direct(14);
     std::vector<TGraph*> momPlots_by_eta(14);
-    std::vector<TGraph*> momPlots_by_eta_direct(14);
     const Int_t n = 10;
     double p[n] = {2.,4.,6.,8.,10.,12.,14.,16.,18.,20.};
+    double etaforplot[14] = {-3.25, -2.75, -2.25, -1.75, -1.25, -0.75, -0.25, 0.25, 0.75, 1.25, 1.75, 2.25, 2.75, 3.25};
     
 
     //make eta labels
@@ -162,18 +166,25 @@ void plotSD(Double_t** st_dev, Double_t** st_dev_direct){
         cout << "MAXIMUM!!!! " << *max << ", " << height << endl;
 
         // cout << "eta label " << i << ": " << etalabels[i] << endl;
-
     }
+
+    //make p labels
+    std::vector<TLatex*> plabels(10);
+    for (int i=0; i<10; i++) {
+        double width = -1.;
+        double height = 2.;
+        char name[1024];
+        sprintf(name, "%.0f < p < %.0f", p[i], p[i+1]);
+        // plabels[i] = new TLatex(width,height,name); //"? ;< p < ?"
+        plabels[i] = new TLatex(width,height,pbins[i]);
+    }
+
 
 
     //fill graphs and plot, also get PWG requirements
     TCanvas *c15 = new TCanvas("c15","c15",1200,900);
 
     //if the first p bin in each eta range has less than 100 events, exclude that eta range
-    int canvas_ctr = 0;
-    for (int i=0; i<14; i++){
-        if (mom_res_hists[i][0]->GetEntries() > 100) canvas_ctr++;
-    }
     if (canvas_ctr <= 12) c15->Divide(3,4);
     else c15->Divide(3,5);
     
@@ -189,25 +200,25 @@ void plotSD(Double_t** st_dev, Double_t** st_dev_direct){
             st_dev_direct[i][j] *= 100.0;
         }
         
-        momPlots_by_eta[i] = new TGraph(n,p,st_dev[i]);
-        momPlots_by_eta_direct[i] = new TGraph(n,p,st_dev_direct[i]);
+        momPlots_by_p[i] = new TGraph(n,p,st_dev[i]);
+        momPlots_by_p_direct[i] = new TGraph(n,p,st_dev_direct[i]);
 
         double* dp_p = calculatePWGreqs(i, p);
         pwg_req_eqs[i] = new TGraph(n,p,dp_p);
 
         c15->cd(i); //CHANGED FROM ORIGINAL i+1
         TMultiGraph *mg = new TMultiGraph();
-        mg->Add(momPlots_by_eta[i]);
+        mg->Add(momPlots_by_p[i]);
         mg->Add(pwg_req_eqs[i]);
-        mg->Add(momPlots_by_eta_direct[i]);
+        mg->Add(momPlots_by_p_direct[i]);
         mg->Draw("ALP"); //"ACP"
 
-        momPlots_by_eta[i]->SetLineColor(4);
-        momPlots_by_eta[i]->SetMarkerColor(4);
-        momPlots_by_eta[i]->SetMarkerStyle(2);
-        momPlots_by_eta_direct[i]->SetLineColor(2);
-        momPlots_by_eta_direct[i]->SetMarkerColor(2);
-        momPlots_by_eta_direct[i]->SetMarkerStyle(5);
+        momPlots_by_p[i]->SetLineColor(4);
+        momPlots_by_p[i]->SetMarkerColor(4);
+        momPlots_by_p[i]->SetMarkerStyle(2);
+        momPlots_by_p_direct[i]->SetLineColor(2);
+        momPlots_by_p_direct[i]->SetMarkerColor(2);
+        momPlots_by_p_direct[i]->SetMarkerStyle(5);
 
         mg->GetXaxis()->SetTitle("Track p [GeV/c]");
         mg->GetYaxis()->SetTitle("#Deltap/p (%)");
@@ -219,7 +230,58 @@ void plotSD(Double_t** st_dev, Double_t** st_dev_direct){
 
     }
 
-    c15->Print("plots/mom_res_SD_by_eta.pdf");
+    c15->Print("plots/mom_res_SD_by_p.pdf");
+
+
+
+    //fill graphs and plot, also get PWG requirements
+    TCanvas *c16 = new TCanvas("c16","c16",1200,900);
+    c16->Divide(5,2);
+    
+    for(int i=0; i<10; i++){
+
+        //save each column of st_dev 2d array into an array
+        Double_t st_dev_col[14];
+        for (int a=0; a<14; a++){
+            st_dev_col[a] = st_dev[a][i];
+            cout << st_dev[a][i] << ", ";
+        }
+        cout << endl;
+
+        momPlots_by_eta[i] = new TGraph(14,etaforplot,st_dev_col);
+        // for (int b=0; b<14; b++){
+        //     cout << b << ": (" << etaforplot[b] << ", " << st_dev_col[b] << ")" << endl;
+        // }
+        if (i==6) {
+            for (int b=0; b<14; b++){
+                cout << b << ": (" << etaforplot[b] << ", " << st_dev_col[b] << ")" << endl;
+            }
+        }
+
+
+        c16->cd(i+1); 
+        momPlots_by_eta[i]->Draw("ALP"); //"ACP"
+
+        momPlots_by_eta[i]->SetLineColor(4);
+        momPlots_by_eta[i]->SetMarkerColor(2);
+        momPlots_by_eta[i]->SetMarkerStyle(2);
+
+        momPlots_by_eta[i]->GetXaxis()->SetTitle("Track #eta [rad]");
+        momPlots_by_eta[i]->GetYaxis()->SetTitle("#Deltap/p (%)");
+        momPlots_by_eta[i]->GetXaxis()->CenterTitle();
+        momPlots_by_eta[i]->GetYaxis()->CenterTitle();
+
+        plabels[i]->SetTextFont(43); plabels[i]->SetTextSize(12);
+        plabels[i]->Draw("same");
+
+    }
+
+    c16->Print("plots/mom_res_SD_by_eta.pdf");
+
+
+
+
+
 
 
 }
@@ -266,6 +328,11 @@ void plotMomRes(int nEntries){
         
 
 
+    }
+
+    //if the first p bin in each eta range has less than 100 events, exclude that eta range
+    for (int i=0; i<14; i++){
+        if (mom_res_preliminary_hists[i][0]->GetEntries() > 100) canvas_ctr++;
     }
 
     //print statements
