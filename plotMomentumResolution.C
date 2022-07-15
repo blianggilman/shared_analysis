@@ -1,7 +1,9 @@
-
 #include <iostream>
 #include <string>
 #include <vector>
+#include <fstream>
+#include <sstream>
+
 using namespace std;
 
 #include "insert.h"
@@ -182,7 +184,42 @@ void plotSD(Double_t** st_dev, Double_t** st_dev_direct, int canvas_ctr){
         plabels[i] = new TLatex(width,height,pbins[i]);
     }
 
+    std:vector<TGraph*> EICPlots(14);
 
+    string dat[14];
+    for (int i=0; i<14; i++){
+       char thingy[1024];
+       sprintf(thingy, "/project/projectdirs/alice/eyeats/out_ECCE/60610987/tracking_output/dat%i.csv", i);
+       dat[i] = thingy;
+    }
+
+    cout << "CHECKPOINT 1!!!!!" << endl;
+    for (int i=0; i<14; i++){
+        ifstream src(dat[i]);
+        string line;
+        int counter = 0;
+
+        Double_t* EIC_x = 0;
+        EIC_x = new double[9];
+
+        Double_t* EIC_y = 0;
+        EIC_y = new double[9];
+
+        while(!src.eof()){
+           src >> line;
+           cout << line << " " << endl;
+           if (counter%2 ==0){
+               //cout << line.substr(0,line.find(",")) << " " << i << " " << counter << endl;
+               EIC_x[i] = stod(line.substr(0,line.find(",")));
+           } else {EIC_y[i] = stod(line);
+           }
+           counter++;
+        }
+        for (int j=0; j<9; j++){
+        cout << EIC_x[j] << " " << EIC_y[j] << endl;
+        }
+        EICPlots[i] = new TGraph(9, EIC_x, EIC_y);
+    }
 
     //fill graphs and plot, also get PWG requirements
     TCanvas *c15 = new TCanvas("c15","c15",1200,900);
@@ -210,7 +247,8 @@ void plotSD(Double_t** st_dev, Double_t** st_dev_direct, int canvas_ctr){
         c15->cd(i); //CHANGED FROM ORIGINAL i+1
         TMultiGraph *mg = new TMultiGraph();
         mg->Add(momPlots_by_p[i]);
-        mg->Add(pwg_req_eqs[i]);
+        mg->Add(EICPlots[i]);
+	mg->Add(pwg_req_eqs[i]);
         mg->Add(momPlots_by_p_direct[i]);
         mg->Draw("ALP"); //"ACP"
 
@@ -255,7 +293,7 @@ void plotSD(Double_t** st_dev, Double_t** st_dev_direct, int canvas_ctr){
         momPlots_by_eta[i] = new TGraph(canvas_ctr,etaforplot,st_dev_col);
 
         pretty_TGraph(momPlots_by_eta[i],62,20,"Track #eta [rad]","#Deltap/p (%)","title");
-        momPlots_by_eta[i].GetXaxis() -> SetTitleOffset(0.1);
+        momPlots_by_eta[i]->GetXaxis() -> SetTitleOffset(0.1);
         
         // for (int b=0; b<14; b++){
         //     cout << b << ": (" << etaforplot[b] << ", " << st_dev_col[b] << ")" << endl;
