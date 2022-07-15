@@ -212,7 +212,7 @@ void plotSD(Double_t** st_dev, Double_t** st_dev_direct, int canvas_ctr){
     std::vector<TLatex*> plabels(10);
     for (int i=0; i<10; i++) {
         double width = -2.;
-        double height = 0.05;
+        double height = 0.02;
         char name[1024];
         sprintf(name, "%.0f < p < %.0f", p[i], p[i+1]);
         // plabels[i] = new TLatex(width,height,name); //"? ;< p < ?"
@@ -681,11 +681,12 @@ void plotSD(Double_t** st_dev, Double_t** st_dev_direct, int canvas_ctr){
         //save each column of st_dev 2d array into an array
         Double_t st_dev_col[canvas_ctr];
         for (int a=0; a<14; a++){
+            // cout << "Otirignal " << st_dev[a][i] <<", " << endl;
             if (a==0 || a ==13) continue;
-            st_dev_col[a-1] = st_dev[a+1][i];
-            cout << st_dev[a+1][i] << ", ";
+            st_dev_col[a-1] = st_dev[a][i];
+            // cout << st_dev[a][i] << ", " << endl;;
         }
-        cout << endl;
+        // cout << endl;
 
         momPlots_by_eta[i] = new TGraph(canvas_ctr,etaforplot,st_dev_col);
 
