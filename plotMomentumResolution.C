@@ -130,6 +130,8 @@ double* calculatePWGreqs(int i, double p[]){
     for (int j=0; j<10; j++){
         double sum = pow(A[i]*p[j],2) + pow(B[i],2);
         dp_p[j] = sqrt(sum);
+        //convert pwg reqs into decimals (originally in percentages)
+        dp_p[j] /= 100.0;
     }
 
     return dp_p;
@@ -192,9 +194,6 @@ void plotSD(Double_t** st_dev, Double_t** st_dev_direct, int canvas_ctr){
     // cout << "length of eta " << sizeof(etabins) << " " << sizeof(etalabels) << endl;
     for (int i=0; i<14; i++) {
         double* dp_p = calculatePWGreqs(i, p);
-        for (int j=0; j<10; j++){
-            dp_p[j] /= 100.0;
-        }
 
         cout << "terms in dp/p: ";
         for (int j=0; j<10; j++){
@@ -212,8 +211,8 @@ void plotSD(Double_t** st_dev, Double_t** st_dev_direct, int canvas_ctr){
     //make p labels
     std::vector<TLatex*> plabels(10);
     for (int i=0; i<10; i++) {
-        double width = -1.;
-        double height = 2.;
+        double width = -2.;
+        double height = 0.05;
         char name[1024];
         sprintf(name, "%.0f < p < %.0f", p[i], p[i+1]);
         // plabels[i] = new TLatex(width,height,name); //"? ;< p < ?"
@@ -627,10 +626,6 @@ void plotSD(Double_t** st_dev, Double_t** st_dev_direct, int canvas_ctr){
         momPlots_by_p_direct[i] = new TGraph(n,p,st_dev_direct[i]);
 
         double* dp_p = calculatePWGreqs(i, p);
-        //convert pwg reqs into decimals (originally in percentages)
-        for (int j=0; j<10; j++){
-            dp_p[j] /= 100.0;
-        }
         pwg_req_eqs[i] = new TGraph(n,p,dp_p);
 
         c15->cd(i); //CHANGED FROM ORIGINAL i+1
@@ -664,7 +659,13 @@ void plotSD(Double_t** st_dev, Double_t** st_dev_direct, int canvas_ctr){
 
         etalabels[i]->SetTextFont(43); etalabels[i]->SetTextSize(18);
         etalabels[i]->Draw("same");
-
+	
+	auto legend = new TLegend(0.1,.7,0.48,0.9);
+   	legend->SetHeader("The Legend Title","C"); // option "C" allows to center the header
+   	legend->AddEntry(momPlots_by_p_direct[i],"Momentum Plots By P","l");
+   	legend->AddEntry(EICPlots[i],"ECCE Paper Plots","l");
+   	legend->AddEntry(pwg_req_eqs[i],"PWG Requirement Equations","l");
+   	legend->Draw();
     }
 
     c15->Print("plots/mom_res_SD_by_p.pdf");
@@ -688,8 +689,8 @@ void plotSD(Double_t** st_dev, Double_t** st_dev_direct, int canvas_ctr){
 
         momPlots_by_eta[i] = new TGraph(canvas_ctr,etaforplot,st_dev_col);
 
-        pretty_TGraph(momPlots_by_eta[i],62,20,"Track #eta [rad]","#Deltap/p (%)","title");
-        momPlots_by_eta[i]->GetXaxis() -> SetTitleOffset(0.1);
+        pretty_TGraph(momPlots_by_eta[i],62,20,"Track #eta [rad]","#Deltap/p (%)","");
+        momPlots_by_eta[i]->GetXaxis() -> SetTitleOffset(0.0);
         
         // for (int b=0; b<14; b++){
         //     cout << b << ": (" << etaforplot[b] << ", " << st_dev_col[b] << ")" << endl;
@@ -707,18 +708,20 @@ void plotSD(Double_t** st_dev, Double_t** st_dev_direct, int canvas_ctr){
 
         momPlots_by_eta[i]->Draw("ALP"); //"ACP"
 
-        // momPlots_by_eta[i]->SetLineColor(4);
-        // momPlots_by_eta[i]->SetMarkerColor(2);
-        // momPlots_by_eta[i]->SetMarkerStyle(2);
+        //momPlots_by_eta[i]->SetLineColor(4);
+        //momPlots_by_eta[i]->SetMarkerColor(2);
+        //momPlots_by_eta[i]->SetMarkerStyle(2);
 
-        // momPlots_by_eta[i]->GetXaxis()->SetTitle("Track #eta [rad]");
-        // momPlots_by_eta[i]->GetYaxis()->SetTitle("#Deltap/p (%)");
-        // momPlots_by_eta[i]->GetXaxis()->CenterTitle();
-        // momPlots_by_eta[i]->GetYaxis()->CenterTitle();
-
-        plabels[i]->SetTextFont(43); plabels[i]->SetTextSize(24);
+        momPlots_by_eta[i]->GetXaxis()->SetTitle("Track #eta [rad]");
+        momPlots_by_eta[i]->GetYaxis()->SetTitle("#Deltap/p");
+        momPlots_by_eta[i]->GetXaxis()->CenterTitle();
+        momPlots_by_eta[i]->GetYaxis()->CenterTitle();
+	
+   	 
+        plabels[i]->SetTextFont(43); 
+	    plabels[i]->SetTextSize(18);
         plabels[i]->Draw("same");
-
+  
     }
 
     c16->Print("plots/mom_res_SD_by_eta.pdf");
@@ -751,6 +754,7 @@ void pretty_TGraph( TGraph * g, int color = 1, int marker = 20, TString xtitle =
 
     g -> SetTitle(title);
 }
+
 
 //plot histogram of dp/p in multiple bins of eta and p (see graph for specifics)
 //eta: [-3.5,3.5] in bins of 0.5
