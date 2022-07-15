@@ -4,6 +4,7 @@
 - examine what is happening for 1.5 < eta < 2 (both)
 - make title and lable sizes bigger (emma)
 - add a legend (emma)
+- make p labels show up by changing height to 0.2?
 
 - [DONE] maybe add plots of dp/p vs eta in bins of pt
 - [DONE] maybe add header file that holds variables
