@@ -27,9 +27,10 @@ vector<vector<TH1F*>> mom_res_preliminary_hists(14);
 vector<vector<TH1F*>> mom_res_hists(14);
 vector<vector<TH1F*>> mom_res_hists_direct(14);
 
-int canvas_ctr = 0;
 // int num_eta_bins = 14;
 // int num_pt_bins = 10;
+
+void pretty_TGraph( TGraph * g, int color = 1, int marker = 20, TString xtitle = "", TString ytitle = "", TString title="");
 
 void initializeHists(){
     for (int i=0; i<14; i++){
@@ -135,7 +136,7 @@ double* calculatePWGreqs(int i, double p[]){
 
 
 //plot SD results
-void plotSD(Double_t** st_dev, Double_t** st_dev_direct){
+void plotSD(Double_t** st_dev, Double_t** st_dev_direct, int canvas_ctr){
     
     //initialize array of TGraphs
     std::vector<TGraph*> pwg_req_eqs(14);
@@ -144,7 +145,9 @@ void plotSD(Double_t** st_dev, Double_t** st_dev_direct){
     std::vector<TGraph*> momPlots_by_eta(14);
     const Int_t n = 10;
     double p[n] = {2.,4.,6.,8.,10.,12.,14.,16.,18.,20.};
-    double etaforplot[14] = {-3.25, -2.75, -2.25, -1.75, -1.25, -0.75, -0.25, 0.25, 0.75, 1.25, 1.75, 2.25, 2.75, 3.25};
+    // double etaforplot[14] = {-3.25, -2.75, -2.25, -1.75, -1.25, -0.75, -0.25, 0.25, 0.75, 1.25, 1.75, 2.25, 2.75, 3.25};
+    static int canvas_ctr_static = canvas_ctr;
+    double etaforplot[12] = {-2.75, -2.25, -1.75, -1.25, -0.75, -0.25, 0.25, 0.75, 1.25, 1.75, 2.25, 2.75};
     
 
     //make eta labels
@@ -193,17 +196,15 @@ void plotSD(Double_t** st_dev, Double_t** st_dev_direct){
         // cout << st_dev[1][1] << ", " << st_dev[5][5] << endl;
 
         if (i==0 || i==13) continue;
-
-        //convert st dev's into percentages
-        for (int j=0; j<10; j++){
-            st_dev[i][j] *= 100.0;
-            st_dev_direct[i][j] *= 100.0;
-        }
         
         momPlots_by_p[i] = new TGraph(n,p,st_dev[i]);
         momPlots_by_p_direct[i] = new TGraph(n,p,st_dev_direct[i]);
 
         double* dp_p = calculatePWGreqs(i, p);
+        //convert pwg reqs into decimals (originally in percentages)
+        for (int j=0; j<10; j++){
+            dp_p[j] /= 100.0;
+        }
         pwg_req_eqs[i] = new TGraph(n,p,dp_p);
 
         c15->cd(i); //CHANGED FROM ORIGINAL i+1
@@ -224,8 +225,10 @@ void plotSD(Double_t** st_dev, Double_t** st_dev_direct){
         mg->GetYaxis()->SetTitle("#Deltap/p (%)");
         mg->GetXaxis()->CenterTitle();
         mg->GetYaxis()->CenterTitle();
+        // mg->GetXaxis()->SetSize(12);
+        // mg->GetYaxis()->SetSize(12);
 
-        etalabels[i]->SetTextFont(43); etalabels[i]->SetTextSize(12);
+        etalabels[i]->SetTextFont(43); etalabels[i]->SetTextSize(24);
         etalabels[i]->Draw("same");
 
     }
@@ -241,37 +244,45 @@ void plotSD(Double_t** st_dev, Double_t** st_dev_direct){
     for(int i=0; i<10; i++){
 
         //save each column of st_dev 2d array into an array
-        Double_t st_dev_col[14];
+        Double_t st_dev_col[canvas_ctr];
         for (int a=0; a<14; a++){
-            st_dev_col[a] = st_dev[a][i];
-            cout << st_dev[a][i] << ", ";
+            if (a==0 || a ==13) continue;
+            st_dev_col[a-1] = st_dev[a+1][i];
+            cout << st_dev[a+1][i] << ", ";
         }
         cout << endl;
 
-        momPlots_by_eta[i] = new TGraph(14,etaforplot,st_dev_col);
+        momPlots_by_eta[i] = new TGraph(canvas_ctr,etaforplot,st_dev_col);
+
+        pretty_TGraph(momPlots_by_eta[i],62,20,"Track #eta [rad]","#Deltap/p (%)","title");
+        momPlots_by_eta[i].GetXaxis() -> SetTitleOffset(0.1);
+        
         // for (int b=0; b<14; b++){
         //     cout << b << ": (" << etaforplot[b] << ", " << st_dev_col[b] << ")" << endl;
         // }
         if (i==6) {
-            for (int b=0; b<14; b++){
+            for (int b=0; b<canvas_ctr; b++){
                 cout << b << ": (" << etaforplot[b] << ", " << st_dev_col[b] << ")" << endl;
             }
         }
 
 
-        c16->cd(i+1); 
+        c16->cd(i+1);
+
+        gPad -> SetLeftMargin(0.2);
+
         momPlots_by_eta[i]->Draw("ALP"); //"ACP"
 
-        momPlots_by_eta[i]->SetLineColor(4);
-        momPlots_by_eta[i]->SetMarkerColor(2);
-        momPlots_by_eta[i]->SetMarkerStyle(2);
+        // momPlots_by_eta[i]->SetLineColor(4);
+        // momPlots_by_eta[i]->SetMarkerColor(2);
+        // momPlots_by_eta[i]->SetMarkerStyle(2);
 
-        momPlots_by_eta[i]->GetXaxis()->SetTitle("Track #eta [rad]");
-        momPlots_by_eta[i]->GetYaxis()->SetTitle("#Deltap/p (%)");
-        momPlots_by_eta[i]->GetXaxis()->CenterTitle();
-        momPlots_by_eta[i]->GetYaxis()->CenterTitle();
+        // momPlots_by_eta[i]->GetXaxis()->SetTitle("Track #eta [rad]");
+        // momPlots_by_eta[i]->GetYaxis()->SetTitle("#Deltap/p (%)");
+        // momPlots_by_eta[i]->GetXaxis()->CenterTitle();
+        // momPlots_by_eta[i]->GetYaxis()->CenterTitle();
 
-        plabels[i]->SetTextFont(43); plabels[i]->SetTextSize(12);
+        plabels[i]->SetTextFont(43); plabels[i]->SetTextSize(24);
         plabels[i]->Draw("same");
 
     }
@@ -286,7 +297,26 @@ void plotSD(Double_t** st_dev, Double_t** st_dev_direct){
 
 }
 
+void pretty_TGraph( TGraph * g, int color = 1, int marker = 20, TString xtitle = "", TString ytitle = "", TString title=""){
+    g -> SetLineColor(color);
+    g -> SetMarkerColor(color);
+    g -> SetLineWidth(2);
+    g -> SetMarkerStyle(marker);
 
+    g -> GetXaxis() -> SetTitle(xtitle);
+    g -> GetXaxis() -> CenterTitle();
+    g -> GetXaxis() -> SetNdivisions(107);
+    g -> GetXaxis() -> SetTitleSize(0.05);
+    g -> GetXaxis() -> SetLabelSize(0.05);
+
+    g -> GetYaxis() -> SetTitle(ytitle);
+    g -> GetYaxis() -> CenterTitle();
+    g -> GetYaxis() -> SetNdivisions(107);
+    g -> GetYaxis() -> SetTitleSize(0.05);
+    g -> GetYaxis() -> SetLabelSize(0.05);
+
+    g -> SetTitle(title);
+}
 
 //plot histogram of dp/p in multiple bins of eta and p (see graph for specifics)
 //eta: [-3.5,3.5] in bins of 0.5
@@ -331,6 +361,7 @@ void plotMomRes(int nEntries){
     }
 
     //if the first p bin in each eta range has less than 100 events, exclude that eta range
+    int canvas_ctr = 0;
     for (int i=0; i<14; i++){
         if (mom_res_preliminary_hists[i][0]->GetEntries() > 100) canvas_ctr++;
     }
@@ -444,7 +475,7 @@ void plotMomRes(int nEntries){
 
 
     //plot SD
-    plotSD(st_dev_final_fromfit, st_dev_final_direct);
+    plotSD(st_dev_final_fromfit, st_dev_final_direct, canvas_ctr);
 
 }
 
