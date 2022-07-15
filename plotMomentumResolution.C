@@ -655,12 +655,18 @@ void plotSD(Double_t** st_dev, Double_t** st_dev_direct, int canvas_ctr){
         mg->GetYaxis()->SetTitle("#Deltap/p");
         mg->GetXaxis()->CenterTitle();
         mg->GetYaxis()->CenterTitle();
-        // mg->GetXaxis()->SetSize(12);
-        // mg->GetYaxis()->SetSize(12);
+        mg->GetXaxis()->SetTitleSize(24);
+        mg->GetYaxis()->SetTitleSize(24);
 
         etalabels[i]->SetTextFont(43); etalabels[i]->SetTextSize(18);
         etalabels[i]->Draw("same");
-
+	
+	auto legend = new TLegend(0.1,.7,0.48,0.9);
+   	legend->SetHeader("The Legend Title","C"); // option "C" allows to center the header
+   	legend->AddEntry(momPlots_by_p_direct[i],"Momentum Plots By P","l");
+   	legend->AddEntry(EICPlots[i],"ECCE Paper Plots","l");
+   	legend->AddEntry(pwg_req_eqs[i],"PWG Requirement Equations","l");
+   	legend->Draw();
     }
 
     c15->Print("plots/mom_res_SD_by_p.pdf");
@@ -684,7 +690,7 @@ void plotSD(Double_t** st_dev, Double_t** st_dev_direct, int canvas_ctr){
 
         momPlots_by_eta[i] = new TGraph(canvas_ctr,etaforplot,st_dev_col);
 
-        pretty_TGraph(momPlots_by_eta[i],62,20,"Track #eta [rad]","#Deltap/p (%)","title");
+        pretty_TGraph(momPlots_by_eta[i],62,20,"Track #eta [rad]","#Deltap/p (%)","");
         momPlots_by_eta[i]->GetXaxis() -> SetTitleOffset(0.1);
         
         // for (int b=0; b<14; b++){
@@ -703,18 +709,20 @@ void plotSD(Double_t** st_dev, Double_t** st_dev_direct, int canvas_ctr){
 
         momPlots_by_eta[i]->Draw("ALP"); //"ACP"
 
-        // momPlots_by_eta[i]->SetLineColor(4);
-        // momPlots_by_eta[i]->SetMarkerColor(2);
-        // momPlots_by_eta[i]->SetMarkerStyle(2);
+        //momPlots_by_eta[i]->SetLineColor(4);
+        //momPlots_by_eta[i]->SetMarkerColor(2);
+        //momPlots_by_eta[i]->SetMarkerStyle(2);
 
-        // momPlots_by_eta[i]->GetXaxis()->SetTitle("Track #eta [rad]");
-        // momPlots_by_eta[i]->GetYaxis()->SetTitle("#Deltap/p (%)");
-        // momPlots_by_eta[i]->GetXaxis()->CenterTitle();
-        // momPlots_by_eta[i]->GetYaxis()->CenterTitle();
-
-        plabels[i]->SetTextFont(43); plabels[i]->SetTextSize(24);
+        momPlots_by_eta[i]->GetXaxis()->SetTitle("Track #eta [rad]");
+        momPlots_by_eta[i]->GetYaxis()->SetTitle("#Deltap/p (%)");
+        momPlots_by_eta[i]->GetXaxis()->CenterTitle();
+        momPlots_by_eta[i]->GetYaxis()->CenterTitle();
+	
+   	 
+        plabels[i]->SetTextFont(43); 
+	plabels[i]->SetTextSize(18);
         plabels[i]->Draw("same");
-
+  
     }
 
     c16->Print("plots/mom_res_SD_by_eta.pdf");
@@ -747,6 +755,7 @@ void pretty_TGraph( TGraph * g, int color = 1, int marker = 20, TString xtitle =
 
     g -> SetTitle(title);
 }
+
 
 //plot histogram of dp/p in multiple bins of eta and p (see graph for specifics)
 //eta: [-3.5,3.5] in bins of 0.5
