@@ -92,3 +92,4 @@ tmtags
 *.log
 
 /insert.h
+/plots/
