@@ -647,16 +647,20 @@ void plotSD(Double_t** st_dev, Double_t** st_dev_direct, int canvas_ctr){
         momPlots_by_p_direct[i]->SetLineColor(2);
         momPlots_by_p_direct[i]->SetMarkerColor(2);
         momPlots_by_p_direct[i]->SetMarkerStyle(5);
-        EICPlots[i]->SetLineColor(3);
-        EICPlots[i]->SetMarkerColor(3);
+        EICPlots[i]->SetLineColor(8);
+        EICPlots[i]->SetMarkerColor(8);
         EICPlots[i]->SetMarkerStyle(4);
 
         mg->GetXaxis()->SetTitle("Track p [GeV/c]");
         mg->GetYaxis()->SetTitle("#Deltap/p");
         mg->GetXaxis()->CenterTitle();
         mg->GetYaxis()->CenterTitle();
-        // mg->GetXaxis()->SetSize(12);
-        // mg->GetYaxis()->SetSize(12);
+        mg -> GetXaxis() -> SetNdivisions(107);
+        mg -> GetXaxis() -> SetTitleSize(0.05);
+        mg -> GetXaxis() -> SetLabelSize(0.05);
+        mg -> GetYaxis() -> SetNdivisions(107);
+        mg -> GetYaxis() -> SetTitleSize(0.05);
+        mg -> GetYaxis() -> SetLabelSize(0.05);
 
         etalabels[i]->SetTextFont(43); etalabels[i]->SetTextSize(18);
         etalabels[i]->Draw("same");
@@ -761,6 +765,7 @@ void plotMomRes(int nEntries){
     //fill histograms based on the bins
     for (int i=0; i<nEntries; i++) {
         if (i%1000000==0) cout << "jet: " << i << " out of: " << nEntries << endl;
+        if (i==1000000) break;
         
         tree->GetEntry(i);
         float eta = calculateEta(px,py,pz);
@@ -851,6 +856,7 @@ void plotMomRes(int nEntries){
     //fill histograms with new binning from std dev w fits
     for (int i=0; i<nEntries; i++) {
         if (i%1000000==0) cout << "jet: " << i << " out of: " << nEntries << endl;
+        if (i==1000000) break;
         
         tree->GetEntry(i);
         float eta = calculateEta(px,py,pz);
