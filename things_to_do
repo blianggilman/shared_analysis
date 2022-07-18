@@ -1,13 +1,13 @@
 - [DONE] make sure all eta labels are displaying properly (emma)
 - [DONE] use web plot digitizer to extract data from Figure 10 of ECCE note (use red curve, SG) (emma)
 - [DONE] exclude high eta by # of events (bea)
-- examine what is happening for 1.5 < eta < 2 (both)
+- [DONE] examine what is happening for 1.5 < eta < 2 (both)
 - make title and lable sizes bigger (emma)
-- add a legend (emma)
-- make p labels show up by changing height to 0.2? (bea)
-- make sure points and lines are the same color/other plot cleanup
-- ppt clean up 
-- put all plots on ppt
+- [DONE] add a legend (emma)
+- [DONE] make p labels show up by changing height to 0.2? (bea)
+- [DONE] make sure points and lines are the same color/other plot cleanup
+- [DONE] ppt clean up 
+- [DONE]cput all plots on ppt
 
 - [DONE] maybe add plots of dp/p vs eta in bins of pt
 - [DONE] maybe add header file that holds variables
