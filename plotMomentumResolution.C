@@ -3,6 +3,7 @@
 #include <vector>
 #include <fstream>
 #include <sstream>
+#include <cstdlib>
 
 using namespace std;
 
@@ -176,19 +177,46 @@ void grrReadFile(){
 //plot SD results
 void plotSD(Double_t** st_dev, Double_t** st_dev_direct, int canvas_ctr){
     
-    //initialize array of TGraphs
+    /*//initialize array of TGraphs
     std::vector<TGraph*> pwg_req_eqs(14);
     std::vector<TGraph*> momPlots_by_p(14);
     std::vector<TGraph*> momPlots_by_p_direct(14);
-    std::vector<TGraph*> momPlots_by_eta(14);
+    std::vector<TGraph*> momPlots_by_eta(14);*/
     std::vector<TGraph*> EICPlots(14);
     const Int_t n = 10;
     double p[n] = {2.,4.,6.,8.,10.,12.,14.,16.,18.,20.};
     // double etaforplot[14] = {-3.25, -2.75, -2.25, -1.75, -1.25, -0.75, -0.25, 0.25, 0.75, 1.25, 1.75, 2.25, 2.75, 3.25};
     static int canvas_ctr_static = canvas_ctr;
     double etaforplot[12] = {-2.75, -2.25, -1.75, -1.25, -0.75, -0.25, 0.25, 0.75, 1.25, 1.75, 2.25, 2.75};
+
+
+
+    for (int i=0; i<14; i++) {
+
+        if (i==0 || i==13) continue;
+
+        double* dp_p = calculatePWGreqs(i, p);
+
+        char newfilename[1024];
+        sprintf(newfilename, "datafiles/data_mom_res_PWG_req_eta%s-%s.dat", etachars[i], etachars[i+1]);
+
+        ofstream outdata; // outdata is like cin
+        outdata.open(newfilename); // opens the file
+        if( !outdata ) { // file couldn't be opened
+            cerr << "Error: file could not be opened" << endl;
+            exit(1);
+        }
+
+        for (int j=0; j<n; j++)
+            outdata << p[j] << " " << dp_p[j] << endl;
+        outdata.close();
+
+    }
+
     
 
+    
+/*
     //make eta labels
     std::vector<TLatex*> etalabels(14);
     // cout << "length of eta " << sizeof(etabins) << " " << sizeof(etalabels) << endl;
@@ -243,7 +271,7 @@ void plotSD(Double_t** st_dev, Double_t** st_dev_direct, int canvas_ctr){
     //if the first p bin in each eta range has less than 100 events, exclude that eta range
     if (canvas_ctr <= 12) c15->Divide(3,4);
     else c15->Divide(3,5);
-    
+    */
     for(int i=0; i<14; i++){ //CHANGE UPPER BOUND TO CANVAS_CTR
         // cout << "iteration: " << i << endl;
         // cout << st_dev[1][1] << ", " << st_dev[5][5] << endl;
@@ -621,7 +649,7 @@ void plotSD(Double_t** st_dev, Double_t** st_dev_direct, int canvas_ctr){
 
         }
 
-        
+        /*
         momPlots_by_p[i] = new TGraph(n,p,st_dev[i]);
         momPlots_by_p_direct[i] = new TGraph(n,p,st_dev_direct[i]);
 
@@ -660,14 +688,15 @@ void plotSD(Double_t** st_dev, Double_t** st_dev_direct, int canvas_ctr){
         etalabels[i]->SetTextFont(43); etalabels[i]->SetTextSize(18);
         etalabels[i]->Draw("same");
 	
-	auto legend = new TLegend(0.1,.7,0.48,0.9);
-   	legend->SetHeader("The Legend Title","C"); // option "C" allows to center the header
-   	legend->AddEntry(momPlots_by_p_direct[i],"Momentum Plots By P","l");
-   	legend->AddEntry(EICPlots[i],"ECCE Paper Plots","l");
-   	legend->AddEntry(pwg_req_eqs[i],"PWG Requirement Equations","l");
-   	legend->Draw();
+        auto legend = new TLegend(0.1,.7,0.48,0.9);
+        legend->SetHeader("The Legend Title","C"); // option "C" allows to center the header
+        legend->AddEntry(momPlots_by_p_direct[i],"Momentum Plots By P","l");
+        legend->AddEntry(EICPlots[i],"ECCE Paper Plots","l");
+        legend->AddEntry(pwg_req_eqs[i],"PWG Requirement Equations","l");
+        legend->Draw();
+        */
     }
-
+    /*
     c15->Print("plots/mom_res_SD_by_p.pdf");
 
 
@@ -726,6 +755,7 @@ void plotSD(Double_t** st_dev, Double_t** st_dev_direct, int canvas_ctr){
     }
 
     c16->Print("plots/mom_res_SD_by_eta.pdf");
+    */
 
 
 
@@ -913,6 +943,7 @@ void plotMomRes(int nEntries){
         sprintf(outname, "plots/mom_res_etan%s-%s_bins100_rebinned.pdf", etachars[i], etachars[i+1]);
         canvas[i]->Print(outname);
     }
+    
 
 
     //plot SD
