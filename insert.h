@@ -15,5 +15,9 @@ TFile *file = new TFile("/project/projectdirs/m3763/blianggi/out_ECCE/60218804/t
 //num_p_bins
 //num_eta_bins
 //num_canvases
-  
+
+//output file
+char configuration[1024] = "baseline";
+
+
 #endif
