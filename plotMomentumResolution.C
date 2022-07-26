@@ -248,7 +248,7 @@ void plotSD(Double_t** st_dev, Double_t** st_dev_direct, int canvas_ctr){
         // cout << "iteration: " << i << endl;
         // cout << st_dev[1][1] << ", " << st_dev[5][5] << endl;
 
-        // if (i==0 || i==13) continue;
+        if (i==0 || i==13) continue;
 
         Double_t* EIC_x = 0;
         EIC_x = new double[9];
@@ -602,7 +602,7 @@ void plotMomRes(int nEntries){
 
         }
         char outname[1024];
-        sprintf(outname, "plots/mom_res_etan%s-%s_bins100_rebinned.pdf", etachars[i], etachars[i+1]);
+        sprintf(outname, "plots/%s/mom_res_etan%s-%s_bins100_rebinned.pdf", configuration, etachars[i], etachars[i+1]);
         canvas[i]->Print(outname);
     }
     
