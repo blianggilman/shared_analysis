@@ -197,6 +197,7 @@ void plotSD(Double_t** st_dev, Double_t** st_dev_direct, int canvas_ctr){
 
         double* dp_p = calculatePWGreqs(i, p);
 
+        //save PWG requirements
         char newfilename[1024];
         sprintf(newfilename, "datafiles/data_mom_res_PWG_req_eta%s-%s.dat", etachars[i], etachars[i+1]);
 
@@ -209,6 +210,23 @@ void plotSD(Double_t** st_dev, Double_t** st_dev_direct, int canvas_ctr){
 
         for (int j=0; j<n; j++)
             outdata << p[j] << " " << dp_p[j] << endl;
+        outdata.close();
+
+
+        //save data
+        // char newfilename[1024];
+        char configuration[1024] = "baseline";
+        sprintf(newfilename, "datafiles/data_mom_res_sim_%s_eta%s-%s.dat", configuration, etachars[i], etachars[i+1]);
+
+        // ofstream outdata; // outdata is like cin
+        outdata.open(newfilename); // opens the file
+        if( !outdata ) { // file couldn't be opened
+            cerr << "Error: file could not be opened" << endl;
+            exit(1);
+        }
+
+        for (int j=0; j<n; j++)
+            outdata << p[j] << " " << st_dev_direct[i][j] << endl;
         outdata.close();
 
     }
@@ -276,9 +294,7 @@ void plotSD(Double_t** st_dev, Double_t** st_dev_direct, int canvas_ctr){
         // cout << "iteration: " << i << endl;
         // cout << st_dev[1][1] << ", " << st_dev[5][5] << endl;
 
-        if (i==0 || i==13) continue;
-
-        int counter = 0;
+        // if (i==0 || i==13) continue;
 
         Double_t* EIC_x = 0;
         EIC_x = new double[9];
@@ -289,20 +305,22 @@ void plotSD(Double_t** st_dev, Double_t** st_dev_direct, int canvas_ctr){
         cout << "CHECKPOINT 2!!" << endl;
         char thingy[1024];
         // sprintf(thingy, "/project/projectdirs/alice/eyeats/out_ECCE/60610987/tracking_output/dat%i.csv", i);
-        // sprintf(thingy, "dat%i.csv", i);
-        // cout << "file: " << thingy << endl;
-        // ifstream in(thingy);
-        if (i==1) {
-            ifstream in("dat1.csv");
-            vector<vector<double>> fields;
+        sprintf(thingy, "dat%i.csv", i);
+        cout << "file: " << thingy << endl;
+        ifstream in(thingy);
+
+
+
+        // ifstream in("dat1.csv");
+        vector<vector<double>> fields;
 
         if (in) {
             string line;
             while (getline(in, line)) {
-                cout << "hi" << endl;
+                // cout << "hi" << endl;
                 stringstream sep(line);
                 string field;
-                cout << line << endl;
+                // cout << line << endl;
 
                 fields.push_back(vector<double>());
 
@@ -314,7 +332,7 @@ void plotSD(Double_t** st_dev, Double_t** st_dev_direct, int canvas_ctr){
 
         for (auto row : fields) {
             for (auto field : row) {
-                cout << field << ' ';
+                cout << field << ' '; //PRINTS
             }
             cout << '\n';
         }
@@ -324,330 +342,26 @@ void plotSD(Double_t** st_dev, Double_t** st_dev_direct, int canvas_ctr){
             EIC_x[a] = fields[a][0];
             EIC_y[a] = fields[a][1];
         }
-        EICPlots[i] = new TGraph(9, EIC_x, EIC_y);
+        // EICPlots[i] = new TGraph(9, EIC_x, EIC_y);
         in.close();  
         in.clear();
 
-        } else if (i==2) {
-            ifstream in("dat2.csv");
-            vector<vector<double>> fields;
 
-        if (in) {
-            string line;
-            while (getline(in, line)) {
-                cout << "hi" << endl;
-                stringstream sep(line);
-                string field;
-                cout << line << endl;
+        //save PWG requirements
+        char ecceintnotefilename[1024];
+        sprintf(ecceintnotefilename, "datafiles/data_mom_res_ECCE_intnote_eta%s-%s.dat", etachars[i], etachars[i+1]);
 
-                fields.push_back(vector<double>());
-
-                while (getline(sep, field, ',')) {
-                    fields.back().push_back(stod(field));
-                }
-            }
+        ofstream outdata; // outdata is like cin
+        outdata.open(ecceintnotefilename); // opens the file
+        if( !outdata ) { // file couldn't be opened
+            cerr << "Error: file could not be opened" << endl;
+            exit(1);
         }
 
-        cout << "ROW[0]" << fields[0][0] << ", " << fields[1][0] << endl;
-        for (int a=0; a<9; a++){
-            EIC_x[a] = fields[a][0];
-            EIC_y[a] = fields[a][1];
-        }
-        EICPlots[i] = new TGraph(9, EIC_x, EIC_y);
-        in.close();  
-        in.clear();
+        for (int a=0; a<9; a++)
+            outdata << fields[a][0] << " " << fields[a][1] << endl;
+        outdata.close();
 
-        } else if (i==3) {
-            ifstream in("dat3.csv");
-            vector<vector<double>> fields;
-
-        if (in) {
-            string line;
-            while (getline(in, line)) {
-                cout << "hi" << endl;
-                stringstream sep(line);
-                string field;
-                cout << line << endl;
-
-                fields.push_back(vector<double>());
-
-                while (getline(sep, field, ',')) {
-                    fields.back().push_back(stod(field));
-                }
-            }
-        }
-
-        cout << "ROW[0]" << fields[0][0] << ", " << fields[1][0] << endl;
-        for (int a=0; a<9; a++){
-            EIC_x[a] = fields[a][0];
-            EIC_y[a] = fields[a][1];
-        }
-        EICPlots[i] = new TGraph(9, EIC_x, EIC_y);
-        in.close();  
-        in.clear();
-
-        } else if (i==4) {
-            ifstream in("dat4.csv");
-            vector<vector<double>> fields;
-
-        if (in) {
-            string line;
-            while (getline(in, line)) {
-                cout << "hi" << endl;
-                stringstream sep(line);
-                string field;
-                cout << line << endl;
-
-                fields.push_back(vector<double>());
-
-                while (getline(sep, field, ',')) {
-                    fields.back().push_back(stod(field));
-                }
-            }
-        }
-
-        cout << "ROW[0]" << fields[0][0] << ", " << fields[1][0] << endl;
-        for (int a=0; a<9; a++){
-            EIC_x[a] = fields[a][0];
-            EIC_y[a] = fields[a][1];
-        }
-        EICPlots[i] = new TGraph(9, EIC_x, EIC_y);
-        in.close();  
-        in.clear();
-
-        } else if (i==5) {
-            ifstream in("dat5.csv");
-            vector<vector<double>> fields;
-
-        if (in) {
-            string line;
-            while (getline(in, line)) {
-                cout << "hi" << endl;
-                stringstream sep(line);
-                string field;
-                cout << line << endl;
-
-                fields.push_back(vector<double>());
-
-                while (getline(sep, field, ',')) {
-                    fields.back().push_back(stod(field));
-                }
-            }
-        }
-
-        cout << "ROW[0]" << fields[0][0] << ", " << fields[1][0] << endl;
-        for (int a=0; a<9; a++){
-            EIC_x[a] = fields[a][0];
-            EIC_y[a] = fields[a][1];
-        }
-        EICPlots[i] = new TGraph(9, EIC_x, EIC_y);
-        in.close();  
-        in.clear();
-
-        } else if (i==6) {
-            ifstream in("dat6.csv");
-            vector<vector<double>> fields;
-
-        if (in) {
-            string line;
-            while (getline(in, line)) {
-                cout << "hi" << endl;
-                stringstream sep(line);
-                string field;
-                cout << line << endl;
-
-                fields.push_back(vector<double>());
-
-                while (getline(sep, field, ',')) {
-                    fields.back().push_back(stod(field));
-                }
-            }
-        }
-
-        cout << "ROW[0]" << fields[0][0] << ", " << fields[1][0] << endl;
-        for (int a=0; a<9; a++){
-            EIC_x[a] = fields[a][0];
-            EIC_y[a] = fields[a][1];
-        }
-        EICPlots[i] = new TGraph(9, EIC_x, EIC_y);
-        in.close();  
-        in.clear();
-
-        } else if (i==7) {
-            ifstream in("dat7.csv");
-            vector<vector<double>> fields;
-
-        if (in) {
-            string line;
-            while (getline(in, line)) {
-                cout << "hi" << endl;
-                stringstream sep(line);
-                string field;
-                cout << line << endl;
-
-                fields.push_back(vector<double>());
-
-                while (getline(sep, field, ',')) {
-                    fields.back().push_back(stod(field));
-                }
-            }
-        }
-
-        cout << "ROW[0]" << fields[0][0] << ", " << fields[1][0] << endl;
-        for (int a=0; a<9; a++){
-            EIC_x[a] = fields[a][0];
-            EIC_y[a] = fields[a][1];
-        }
-        EICPlots[i] = new TGraph(9, EIC_x, EIC_y);
-        in.close();  
-        in.clear();
-
-        } else if (i==8) {
-            ifstream in("dat8.csv");
-            vector<vector<double>> fields;
-
-        if (in) {
-            string line;
-            while (getline(in, line)) {
-                cout << "hi" << endl;
-                stringstream sep(line);
-                string field;
-                cout << line << endl;
-
-                fields.push_back(vector<double>());
-
-                while (getline(sep, field, ',')) {
-                    fields.back().push_back(stod(field));
-                }
-            }
-        }
-
-        cout << "ROW[0]" << fields[0][0] << ", " << fields[1][0] << endl;
-        for (int a=0; a<9; a++){
-            EIC_x[a] = fields[a][0];
-            EIC_y[a] = fields[a][1];
-        }
-        EICPlots[i] = new TGraph(9, EIC_x, EIC_y);
-        in.close();  
-        in.clear();
-
-        } else if (i==9) {
-            ifstream in("dat9.csv");
-            vector<vector<double>> fields;
-
-        if (in) {
-            string line;
-            while (getline(in, line)) {
-                cout << "hi" << endl;
-                stringstream sep(line);
-                string field;
-                cout << line << endl;
-
-                fields.push_back(vector<double>());
-
-                while (getline(sep, field, ',')) {
-                    fields.back().push_back(stod(field));
-                }
-            }
-        }
-
-        cout << "ROW[0]" << fields[0][0] << ", " << fields[1][0] << endl;
-        for (int a=0; a<9; a++){
-            EIC_x[a] = fields[a][0];
-            EIC_y[a] = fields[a][1];
-        }
-        EICPlots[i] = new TGraph(9, EIC_x, EIC_y);
-        in.close();  
-        in.clear();
-
-        } else if (i==10) {
-            ifstream in("dat10.csv");
-            vector<vector<double>> fields;
-
-        if (in) {
-            string line;
-            while (getline(in, line)) {
-                cout << "hi" << endl;
-                stringstream sep(line);
-                string field;
-                cout << line << endl;
-
-                fields.push_back(vector<double>());
-
-                while (getline(sep, field, ',')) {
-                    fields.back().push_back(stod(field));
-                }
-            }
-        }
-
-        cout << "ROW[0]" << fields[0][0] << ", " << fields[1][0] << endl;
-        for (int a=0; a<9; a++){
-            EIC_x[a] = fields[a][0];
-            EIC_y[a] = fields[a][1];
-        }
-        EICPlots[i] = new TGraph(9, EIC_x, EIC_y);
-        in.close();  
-        in.clear();
-
-        } else if (i==11) {
-            ifstream in("dat11.csv");
-            vector<vector<double>> fields;
-
-        if (in) {
-            string line;
-            while (getline(in, line)) {
-                cout << "hi" << endl;
-                stringstream sep(line);
-                string field;
-                cout << line << endl;
-
-                fields.push_back(vector<double>());
-
-                while (getline(sep, field, ',')) {
-                    fields.back().push_back(stod(field));
-                }
-            }
-        }
-
-        cout << "ROW[0]" << fields[0][0] << ", " << fields[1][0] << endl;
-        for (int a=0; a<9; a++){
-            EIC_x[a] = fields[a][0];
-            EIC_y[a] = fields[a][1];
-        }
-        EICPlots[i] = new TGraph(9, EIC_x, EIC_y);
-        in.close();  
-        in.clear();
-
-        } else if (i==12) {
-            ifstream in("dat12.csv");
-            vector<vector<double>> fields;
-
-        if (in) {
-            string line;
-            while (getline(in, line)) {
-                cout << "hi" << endl;
-                stringstream sep(line);
-                string field;
-                cout << line << endl;
-
-                fields.push_back(vector<double>());
-
-                while (getline(sep, field, ',')) {
-                    fields.back().push_back(stod(field));
-                }
-            }
-        }
-
-        cout << "ROW[0]" << fields[0][0] << ", " << fields[1][0] << endl;
-        for (int a=0; a<9; a++){
-            EIC_x[a] = fields[a][0];
-            EIC_y[a] = fields[a][1];
-        }
-        EICPlots[i] = new TGraph(9, EIC_x, EIC_y);
-        in.close();  
-        in.clear();
-
-        }
 
         /*
         momPlots_by_p[i] = new TGraph(n,p,st_dev[i]);
