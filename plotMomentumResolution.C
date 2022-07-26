@@ -33,6 +33,8 @@ vector<vector<TH1F*>> mom_res_hists_direct(14);
 // int num_eta_bins = 14;
 // int num_pt_bins = 10;
 
+
+
 void pretty_TGraph( TGraph * g, int color = 1, int marker = 20, TString xtitle = "", TString ytitle = "", TString title="");
 
 void initializeHists(){
@@ -140,36 +142,6 @@ double* calculatePWGreqs(int i, double p[]){
 }
 
 void grrReadFile(){
-    // if (in) {
-    //     string line;
-    //     while (getline(in, line)) {
-    //         cout << "hi" << endl;
-    //         stringstream sep(line);
-    //         string field;
-    //         cout << line << endl;
-
-    //         fields.push_back(vector<double>());
-
-    //         while (getline(sep, field, ',')) {
-    //             fields.back().push_back(stod(field));
-    //         }
-    //     }
-    // }
-
-    // for (auto row : fields) {
-    //     for (auto field : row) {
-    //         cout << field << ' ';
-    //     }
-    //     cout << '\n';
-    // }
-
-    // cout << "ROW[0]" << fields[0][0] << ", " << fields[1][0] << endl;
-    // for (int a=0; a<9; a++){
-    //     EIC_x[a] = fields[a][0];
-    //     EIC_y[a] = fields[a][1];
-    // }
-
-    // EIC_xy
 
     
 }
@@ -214,12 +186,10 @@ void plotSD(Double_t** st_dev, Double_t** st_dev_direct, int canvas_ctr){
 
 
         //save data
-        // char newfilename[1024];
-        char configuration[1024] = "baseline";
-        sprintf(newfilename, "datafiles/data_mom_res_sim_%s_eta%s-%s.dat", configuration, etachars[i], etachars[i+1]);
+        char configfilename[1024];
+        sprintf(configfilename, "datafiles/data_mom_res_sim_%s_eta%s-%s.dat", configuration, etachars[i], etachars[i+1]);
 
-        // ofstream outdata; // outdata is like cin
-        outdata.open(newfilename); // opens the file
+        outdata.open(configfilename); // opens the file
         if( !outdata ) { // file couldn't be opened
             cerr << "Error: file could not be opened" << endl;
             exit(1);
@@ -267,22 +237,6 @@ void plotSD(Double_t** st_dev, Double_t** st_dev_direct, int canvas_ctr){
 
 
 
-    // char dat[14][1025];
-    // for (int i=0; i<14; i++){
-    //    char thingy[1024];
-    //    sprintf(thingy, "/project/projectdirs/alice/eyeats/out_ECCE/60610987/tracking_output/dat%i.csv", i);
-    // //    dat[i] = thingy;
-    // cout << thingy << endl;
-    // }
-
-
-
-    Double_t* EIC_x = 0;
-    EIC_x = new double[9];
-    Double_t* EIC_y = 0;
-    EIC_y = new double[9];
-
-
     //fill graphs and plot, also get PWG requirements
     TCanvas *c15 = new TCanvas("c15","c15",1200,900);
 
@@ -302,22 +256,17 @@ void plotSD(Double_t** st_dev, Double_t** st_dev_direct, int canvas_ctr){
         Double_t* EIC_y = 0;
         EIC_y = new double[9];
 
-        cout << "CHECKPOINT 2!!" << endl;
         char thingy[1024];
         // sprintf(thingy, "/project/projectdirs/alice/eyeats/out_ECCE/60610987/tracking_output/dat%i.csv", i);
         sprintf(thingy, "dat%i.csv", i);
         cout << "file: " << thingy << endl;
+
         ifstream in(thingy);
-
-
-
-        // ifstream in("dat1.csv");
         vector<vector<double>> fields;
 
         if (in) {
             string line;
             while (getline(in, line)) {
-                // cout << "hi" << endl;
                 stringstream sep(line);
                 string field;
                 // cout << line << endl;
@@ -330,14 +279,13 @@ void plotSD(Double_t** st_dev, Double_t** st_dev_direct, int canvas_ctr){
             }
         }
 
-        for (auto row : fields) {
-            for (auto field : row) {
-                cout << field << ' '; //PRINTS
-            }
-            cout << '\n';
-        }
+        // for (auto row : fields) {
+        //     for (auto field : row) {
+        //         cout << field << ' '; //PRINTS
+        //     }
+        //     cout << '\n';
+        // }
 
-        cout << "ROW[0]" << fields[0][0] << ", " << fields[1][0] << endl;
         for (int a=0; a<9; a++){
             EIC_x[a] = fields[a][0];
             EIC_y[a] = fields[a][1];
