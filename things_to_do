@@ -1,29 +1,11 @@
-- [DONE] make sure all eta labels are displaying properly (emma)
-- [DONE] use web plot digitizer to extract data from Figure 10 of ECCE note (use red curve, SG) (emma)
-- [DONE] exclude high eta by # of events (bea)
-- [DONE] examine what is happening for 1.5 < eta < 2 (both)
-- make title and lable sizes bigger (emma)
-- [DONE] add a legend (emma)
-- [DONE] make p labels show up by changing height to 0.2? (bea)
-- [DONE] make sure points and lines are the same color/other plot cleanup
-- [DONE] ppt clean up 
-- [DONE]cput all plots on ppt
-
-- [DONE] maybe add plots of dp/p vs eta in bins of pt
-- [DONE] maybe add header file that holds variables
+- [DONE] output data as dat files (bea)
+- [DONE] get rid of TCanvas plots in root code (bea)
+- make plots in python (emma)
+- make ratio plots
+- [DONE] send histogram fits to separate folders for storage (bea)
 
 
-changed:
-added header file (lines 7-10)
-added .gitignore
-added insert.h
-make all c1's c15's
-added condition to get rid of the far eta range values (need to do more on this later)
 
-change lines 123 and 125 to be 10 (not 14)
-line 158 change &dp_p[i]+j --> dp_p[j]
-switch i and j in line 158
-line 154 -> *max*0.5
-move max element calculation into for loop at line 157
-change max to be calculated using last value of dp_p array (line 160)
+
+
 
