@@ -5,7 +5,7 @@
   
 
 
-TFile *file = new TFile("/project/projectdirs/m3763/blianggi/out_ECCE/00000000/tracking_output/ALL_G4EICDetector_g4tracking_eval.root");
+TFile *file = new TFile("/project/projectdirs/alice/eyeats/out_ECCE/00000000/combined_stats.root");
 // TFile *file = new TFile("/project/projectdirs/m3763/blianggi/out_ECCE/60218804/tracking_output/G4EICDetector_1_g4tracking_eval.root");
 
 //num_p_bins

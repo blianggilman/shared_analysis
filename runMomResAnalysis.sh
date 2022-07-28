@@ -16,6 +16,13 @@ else
 fi
 cd ..
 
+cd datafiles/
+if [ -d $2 ]; then
+    echo "$2 is a directory that already exists"
+else mkdir $2
+fi
+cd ..
+
 # replace configuration name and input file, then run root file
 sed -i "s/baseline/$2/" insert.h
 sed -i "s/00000000/$1/" insert.h
@@ -24,4 +31,13 @@ root plotMomentumResolution.C
 sed -i "s/$2/baseline/" insert.h
 sed -i "s/$1/00000000/" insert.h
 
-# run python code to generate plots here
+# run gnuplot code to generate plots here
+#!/bin/bash
+
+gnuplot -persist <<-EOFMarker
+	c = "$2"
+	load "momentum_p.gnu"
+	load "ratio_momentum_p.gnu"
+EOFMarker
+
+#done!

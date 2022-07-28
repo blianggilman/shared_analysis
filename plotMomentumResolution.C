@@ -171,7 +171,7 @@ void plotSD(Double_t** st_dev, Double_t** st_dev_direct, int canvas_ctr){
 
         //save PWG requirements
         char newfilename[1024];
-        sprintf(newfilename, "datafiles/data_mom_res_PWG_req_eta%s-%s.dat", etachars[i], etachars[i+1]);
+        sprintf(newfilename, "datafiles/%s/data_mom_res_PWG_req_eta%s-%s.dat", configuration, etachars[i], etachars[i+1]);
 
         ofstream outdata; // outdata is like cin
         outdata.open(newfilename); // opens the file
@@ -187,8 +187,8 @@ void plotSD(Double_t** st_dev, Double_t** st_dev_direct, int canvas_ctr){
 
         //save data
         char configfilename[1024];
-        sprintf(configfilename, "datafiles/data_mom_res_sim_%s_eta%s-%s.dat", configuration, etachars[i], etachars[i+1]);
-
+        sprintf(configfilename, "datafiles/%s/data_mom_res_sim_eta%s-%s.dat", configuration, etachars[i], etachars[i+1]);
+	//sprintf(outname, "plots/%s/mom_res_etan%s-%s_bins100_rebinned.pdf", configuration, etachars[i], etachars[i+1]);
         outdata.open(configfilename); // opens the file
         if( !outdata ) { // file couldn't be opened
             cerr << "Error: file could not be opened" << endl;
