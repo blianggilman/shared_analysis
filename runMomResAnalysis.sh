@@ -36,8 +36,11 @@ sed -i "s/$1/00000000/" insert.h
 
 gnuplot -persist <<-EOFMarker
 	c = "$2"
+	otherc = "new_geo" #need to change this!!!
+	othercname = "Ernst + Rey's geometry" #change this too!!!
 	load "momentum_p.gnu"
 	load "ratio_momentum_p.gnu"
+	load "compare_geometries_p.gnu
 EOFMarker
 
 #done!

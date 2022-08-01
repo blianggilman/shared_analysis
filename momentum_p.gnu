@@ -156,7 +156,7 @@ plot 'datafiles/'.c.'/data_mom_res_sim_eta20-25.dat' w linespoints lw 3 lt 1 pt 
 	
 #12. eta = 25-30
 unset label
-set label "25 < {/Symbol h} < 20" at graph 0.75, 0.25 center font "Times, 15" 
+set label "25 < {/Symbol h} < 3330" at graph 0.75, 0.25 center font "Times, 15" 
 
 set key bottom right box opaque spacing 1 width 1 font "Times, 12"
 
