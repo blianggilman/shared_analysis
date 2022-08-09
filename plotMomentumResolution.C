@@ -14,6 +14,7 @@ using namespace std;
 TTree *tree = (TTree*) file->Get("tracks");
 
 float gpx, gpy, gpz, px, py, pz;
+float dca2d, pcaz, gvz;
 
 double etavals[15] = {-3.5, -3.0, -2.5, -2.0, -1.5, -1.0, -0.5, 0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5};
 char etachars[15][25] = {"n35", "n30", "n25", "n20", "n15", "n10", "n05", "00", "05", "10", "15", "20", "25", "30", "35"};
@@ -84,6 +85,13 @@ float calculateMomRes(float gpx, float gpy, float gpz, float px, float py, float
     float gp = calculateP(gpx, gpy, gpz);
     float num = p-gp;
     return (num/abs(gp));
+}
+
+//calculate the longitudinal (z) DCA
+float calculateLongDCA(float pcaz, float gvz){
+    // float dvt = dca2d;
+    float dvl = pcaz - gvz;
+    return(dvl);
 }
 
 
