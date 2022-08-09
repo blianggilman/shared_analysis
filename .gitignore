@@ -91,6 +91,6 @@ tmtags
 *.valgrind
 *.log
 
-/insert.h
+insert.h
 /plots/
 /datafiles/
