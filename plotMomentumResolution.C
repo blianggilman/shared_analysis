@@ -31,6 +31,17 @@ vector<vector<TH1F*>> mom_res_preliminary_hists(14);
 vector<vector<TH1F*>> mom_res_hists(14);
 vector<vector<TH1F*>> mom_res_hists_direct(14);
 
+vector<vector<TH1F*>> phi_res_preliminary_hists(14);
+vector<vector<TH1F*>> theta_res_preliminary_hists(14);
+vector<vector<TH1F*>> longDCA_res_preliminary_hists(14);
+vector<vector<TH1F*>> transDCA_res_preliminary_hists(14);
+
+vector<vector<TH1F*>> phi_res_hists(14);
+vector<vector<TH1F*>> theta_res_hists(14);
+vector<vector<TH1F*>> longDCA_res_hists(14);
+vector<vector<TH1F*>> transDCA_res_hists(14);
+
+
 // int num_eta_bins = 14;
 // int num_pt_bins = 10;
 
@@ -44,6 +55,18 @@ void initializeHists(){
         mom_res_hists[i] = vector<TH1F*>(10);
         mom_res_hists_direct[i] = vector<TH1F*>(10);
 
+        
+        phi_res_preliminary_hists[i] = vector<TH1F*>(10);
+        theta_res_preliminary_hists[i] = vector<TH1F*>(10);
+        longDCA_res_preliminary_hists[i] = vector<TH1F*>(10);
+        transDCA_res_preliminary_hists[i] = vector<TH1F*>(10);
+
+        phi_res_hists[i] = vector<TH1F*>(10);
+        theta_res_hists[i] = vector<TH1F*>(10);
+        longDCA_res_hists[i] = vector<TH1F*>(10);
+        transDCA_res_hists[i] = vector<TH1F*>(10);
+
+
         for(int j=0; j<10; j++){
             // cout << "iteration: " << i << ", " << j << endl;
 
@@ -52,6 +75,30 @@ void initializeHists(){
             char label[1024];
             sprintf(label, ";dp/p, %f < #eta < %f, %d < p < %d", etavals[i], etavals[i+1], j*2, j*2+2);
             mom_res_preliminary_hists[i][j] = new TH1F(title,label,100,-1,1);
+
+            char phititle[1024];
+            sprintf(phititle, "phi_res_eta%s-%s_p%d-%d", etachars[i], etachars[i+1], j*2, j*2+2);
+            char philabel[1024];
+            sprintf(philabel, ";d#phi, %f < #eta < %f, %d < p < %d", etavals[i], etavals[i+1], j*2, j*2+2);
+            phi_res_preliminary_hists[i][j] = new TH1F(phititle,philabel,100,-.1,.1);
+
+            char thetatitle[1024];
+            sprintf(thetatitle, "theta_res_eta%s-%s_p%d-%d", etachars[i], etachars[i+1], j*2, j*2+2);
+            char thetalabel[1024];
+            sprintf(thetalabel, ";d#theta, %f < #eta < %f, %d < p < %d", etavals[i], etavals[i+1], j*2, j*2+2);
+            theta_res_preliminary_hists[i][j] = new TH1F(thetatitle,thetalabel,100,-1,4);
+
+            char longDCAtitle[1024];
+            sprintf(longDCAtitle, "longDCA_res_eta%s-%s_p%d-%d", etachars[i], etachars[i+1], j*2, j*2+2);
+            char thetaDCAlabel[1024];
+            sprintf(thetaDCAlabel, ";Longitudinal DCA, %f < #eta < %f, %d < p < %d", etavals[i], etavals[i+1], j*2, j*2+2);
+            longDCA_res_preliminary_hists[i][j] = new TH1F(longDCAtitle,thetaDCAlabel,100,-175,175);
+
+            char transDCAtitle[1024];
+            sprintf(transDCAtitle, "transDCA_res_eta%s-%s_p%d-%d", etachars[i], etachars[i+1], j*2, j*2+2);
+            char transDCAlabel[1024];
+            sprintf(transDCAlabel, ";Transverse DCA, %f < #eta < %f, %d < p < %d", etavals[i], etavals[i+1], j*2, j*2+2);
+            transDCA_res_preliminary_hists[i][j] = new TH1F(transDCAtitle,transDCAlabel,100,-5,5);
 
         }
     }
@@ -67,12 +114,28 @@ float calculateP(float px, float py, float pz){
 }
 
 
-//calculate eta from theta
-float calculateEta(float px, float py, float pz){
+//calculate phi
+float calculatePhi(float px, float py, float pz){
+    //phi = tan(py/px)???
+    return atan(py/px);
+}
+
+//calculate theta
+float calculateTheta(float px, float py, float pz){
     //to find theta: theta is the COM scattering angle = the angle between the z-axis and 2D momentum
     //cos theta = pz/p
     float p = calculateP(px, py, pz);
     float theta = acos(pz/p);
+
+    return theta;
+}
+
+
+//calculate eta from theta
+float calculateEta(float px, float py, float pz){
+    //to find theta: theta is the COM scattering angle = the angle between the z-axis and 2D momentum
+    //cos theta = pz/p
+    float theta = calculateTheta(px, py, pz);
 
     //given theta, calculate eta = -ln(tan(theta/2))
     return -log(tan(theta/2.));
@@ -87,11 +150,25 @@ float calculateMomRes(float gpx, float gpy, float gpz, float px, float py, float
     return (num/abs(gp));
 }
 
+//calculate the angular theta resolution
+float calculatePhiRes(float gpx, float gpy, float gpz, float px, float py, float pz){
+    float phi = calculatePhi(px, py, pz);
+    float gphi = calculatePhi(gpx, gpy, gpz);
+    return phi-gphi;
+}
+
+//calculate the angular theta resolution
+float calculateThetaRes(float gpx, float gpy, float gpz, float px, float py, float pz){
+    float theta = calculateTheta(px, py, pz);
+    float gtheta = calculateTheta(gpx, gpy, gpz);
+    return theta-gtheta;
+}
+
 //calculate the longitudinal (z) DCA
 float calculateLongDCA(float pcaz, float gvz){
     // float dvt = dca2d;
     float dvl = pcaz - gvz;
-    return(dvl);
+    return dvl;
 }
 
 
@@ -155,7 +232,9 @@ void grrReadFile(){
 }
 
 //plot SD results
-void plotSD(Double_t** st_dev, Double_t** st_dev_direct, int canvas_ctr){
+//flag 0 = mom res, 1 = phi res, 2 = theta res, 3 = longDCA res, 4 = transDCA
+// void plotSD(Double_t** st_dev, Double_t** st_dev_direct, int canvas_ctr, int flag=0){
+void plotSD(Double_t** st_dev, int canvas_ctr, int flag=0){
     
     /*//initialize array of TGraphs
     std::vector<TGraph*> pwg_req_eqs(14);
@@ -170,33 +249,161 @@ void plotSD(Double_t** st_dev, Double_t** st_dev_direct, int canvas_ctr){
     double etaforplot[12] = {-2.75, -2.25, -1.75, -1.25, -0.75, -0.25, 0.25, 0.75, 1.25, 1.75, 2.25, 2.75};
 
 
+    if (flag==0){
+        for (int i=0; i<14; i++) {
+
+            if (i==0 || i==13) continue;
+
+            double* dp_p = calculatePWGreqs(i, p);
+
+            //save PWG requirements
+            char newfilename[1024];
+            sprintf(newfilename, "datafiles/%s/data_mom_res_PWG_req_eta%s-%s.dat", configuration, etachars[i], etachars[i+1]);
+
+            ofstream outdata; // outdata is like cin
+            outdata.open(newfilename); // opens the file
+            if( !outdata ) { // file couldn't be opened
+                cerr << "Error: file could not be opened" << endl;
+                exit(1);
+            }
+
+            for (int j=0; j<n; j++)
+                outdata << p[j] << " " << dp_p[j] << endl;
+            outdata.close();
+        }
+
+    
+
+        for(int i=0; i<14; i++){ //CHANGE UPPER BOUND TO CANVAS_CTR
+            // cout << "iteration: " << i << endl;
+            // cout << st_dev[1][1] << ", " << st_dev[5][5] << endl;
+
+            if (i==0 || i==13) continue;
+
+            Double_t* EIC_x = 0;
+            EIC_x = new double[9];
+
+            Double_t* EIC_y = 0;
+            EIC_y = new double[9];
+
+            char thingy[1024];
+            sprintf(thingy, "dat%i.csv", i);
+            cout << "file: " << thingy << endl;
+
+            ifstream in(thingy);
+            vector<vector<double>> fields;
+
+            if (in) {
+                string line;
+                while (getline(in, line)) {
+                    stringstream sep(line);
+                    string field;
+                    // cout << line << endl;
+
+                    fields.push_back(vector<double>());
+
+                    while (getline(sep, field, ',')) {
+                        fields.back().push_back(stod(field));
+                    }
+                }
+            }
+
+            // for (auto row : fields) {
+            //     for (auto field : row) {
+            //         cout << field << ' '; //PRINTS
+            //     }
+            //     cout << '\n';
+            // }
+
+            for (int a=0; a<9; a++){
+                EIC_x[a] = fields[a][0];
+                EIC_y[a] = fields[a][1];
+            }
+            // EICPlots[i] = new TGraph(9, EIC_x, EIC_y);
+            in.close();  
+            in.clear();
+
+
+            //save PWG requirements
+            char ecceintnotefilename[1024];
+            sprintf(ecceintnotefilename, "datafiles/data_mom_res_ECCE_intnote_eta%s-%s.dat", etachars[i], etachars[i+1]);
+
+            ofstream outdata; // outdata is like cin
+            outdata.open(ecceintnotefilename); // opens the file
+            if( !outdata ) { // file couldn't be opened
+                cerr << "Error: file could not be opened" << endl;
+                exit(1);
+            }
+
+            for (int a=0; a<9; a++)
+                outdata << fields[a][0] << " " << fields[a][1] << endl;
+            outdata.close();
+
+
+            /*
+            momPlots_by_p[i] = new TGraph(n,p,st_dev[i]);
+            momPlots_by_p_direct[i] = new TGraph(n,p,st_dev_direct[i]);
+
+            double* dp_p = calculatePWGreqs(i, p);
+            pwg_req_eqs[i] = new TGraph(n,p,dp_p);
+
+            c15->cd(i); //CHANGED FROM ORIGINAL i+1
+            TMultiGraph *mg = new TMultiGraph();
+            mg->Add(momPlots_by_p[i]);
+            mg->Add(EICPlots[i]);
+            mg->Add(pwg_req_eqs[i]);
+            mg->Add(momPlots_by_p_direct[i]);
+            mg->Draw("ALP"); //"ACP"
+
+            momPlots_by_p[i]->SetLineColor(4);
+            momPlots_by_p[i]->SetMarkerColor(4);
+            momPlots_by_p[i]->SetMarkerStyle(2);
+            momPlots_by_p_direct[i]->SetLineColor(2);
+            momPlots_by_p_direct[i]->SetMarkerColor(2);
+            momPlots_by_p_direct[i]->SetMarkerStyle(5);
+            EICPlots[i]->SetLineColor(8);
+            EICPlots[i]->SetMarkerColor(8);
+            EICPlots[i]->SetMarkerStyle(4);
+
+            mg->GetXaxis()->SetTitle("Track p [GeV/c]");
+            mg->GetYaxis()->SetTitle("#Deltap/p");
+            mg->GetXaxis()->CenterTitle();
+            mg->GetYaxis()->CenterTitle();
+            mg -> GetXaxis() -> SetNdivisions(107);
+            mg -> GetXaxis() -> SetTitleSize(0.05);
+            mg -> GetXaxis() -> SetLabelSize(0.05);
+            mg -> GetYaxis() -> SetNdivisions(107);
+            mg -> GetYaxis() -> SetTitleSize(0.05);
+            mg -> GetYaxis() -> SetLabelSize(0.05);
+
+            etalabels[i]->SetTextFont(43); etalabels[i]->SetTextSize(18);
+            etalabels[i]->Draw("same");
+        
+            auto legend = new TLegend(0.1,.7,0.48,0.9);
+            legend->SetHeader("The Legend Title","C"); // option "C" allows to center the header
+            legend->AddEntry(momPlots_by_p_direct[i],"Momentum Plots By P","l");
+            legend->AddEntry(EICPlots[i],"ECCE Paper Plots","l");
+            legend->AddEntry(pwg_req_eqs[i],"PWG Requirement Equations","l");
+            legend->Draw();
+            */
+        }
+    }
+
+
 
     for (int i=0; i<14; i++) {
 
-        if (i==0 || i==13) continue;
-
-        double* dp_p = calculatePWGreqs(i, p);
-
-        //save PWG requirements
-        char newfilename[1024];
-        sprintf(newfilename, "datafiles/%s/data_mom_res_PWG_req_eta%s-%s.dat", configuration, etachars[i], etachars[i+1]);
-
-        ofstream outdata; // outdata is like cin
-        outdata.open(newfilename); // opens the file
-        if( !outdata ) { // file couldn't be opened
-            cerr << "Error: file could not be opened" << endl;
-            exit(1);
-        }
-
-        for (int j=0; j<n; j++)
-            outdata << p[j] << " " << dp_p[j] << endl;
-        outdata.close();
+        // if (i==0 || i==13) continue;
 
 
         //save data
         char configfilename[1024];
-        sprintf(configfilename, "datafiles/%s/data_mom_res_sim_eta%s-%s.dat", configuration, etachars[i], etachars[i+1]);
-	//sprintf(outname, "plots/%s/mom_res_etan%s-%s_bins100_rebinned.pdf", configuration, etachars[i], etachars[i+1]);
+        if (flag == 0) sprintf(configfilename, "datafiles/%s/data_mom_res_sim_eta%s-%s.dat", configuration, etachars[i], etachars[i+1]);
+        if (flag == 1) sprintf(configfilename, "datafiles/%s/data_phi_res_sim_eta%s-%s.dat", configuration, etachars[i], etachars[i+1]);
+        if (flag == 2) sprintf(configfilename, "datafiles/%s/data_theta_res_sim_eta%s-%s.dat", configuration, etachars[i], etachars[i+1]);
+        if (flag == 3) sprintf(configfilename, "datafiles/%s/data_longDCA_res_sim_eta%s-%s.dat", configuration, etachars[i], etachars[i+1]);
+        if (flag == 4) sprintf(configfilename, "datafiles/%s/data_transDCA_res_sim_eta%s-%s.dat", configuration, etachars[i], etachars[i+1]);
+        ofstream outdata;
         outdata.open(configfilename); // opens the file
         if( !outdata ) { // file couldn't be opened
             cerr << "Error: file could not be opened" << endl;
@@ -204,168 +411,13 @@ void plotSD(Double_t** st_dev, Double_t** st_dev_direct, int canvas_ctr){
         }
 
         for (int j=0; j<n; j++)
-            outdata << p[j] << " " << st_dev_direct[i][j] << endl;
+            outdata << p[j] << " " << st_dev[i][j] << endl;
         outdata.close();
 
     }
-
     
 
-    
-/*
-    //make eta labels
-    std::vector<TLatex*> etalabels(14);
-    // cout << "length of eta " << sizeof(etabins) << " " << sizeof(etalabels) << endl;
-    for (int i=0; i<14; i++) {
-        double* dp_p = calculatePWGreqs(i, p);
 
-        cout << "terms in dp/p: ";
-        for (int j=0; j<10; j++){
-            // max = max_element(dp_p[0], dp_p[j]+10);
-            cout << dp_p[j] << " ";
-        }
-
-        double width = 14.;
-        double height = (dp_p[0]+dp_p[9])/2;
-        etalabels[i] = new TLatex(width,height,etabins[i]);
-
-        // cout << "eta label " << i << ": " << etalabels[i] << endl;
-    }
-
-    //make p labels
-    std::vector<TLatex*> plabels(10);
-    for (int i=0; i<10; i++) {
-        double width = -2.;
-        double height = 0.02;
-        char name[1024];
-        sprintf(name, "%.0f < p < %.0f", p[i], p[i+1]);
-        // plabels[i] = new TLatex(width,height,name); //"? ;< p < ?"
-        plabels[i] = new TLatex(width,height,pbins[i]);
-    }
-
-
-
-    //fill graphs and plot, also get PWG requirements
-    TCanvas *c15 = new TCanvas("c15","c15",1200,900);
-
-    //if the first p bin in each eta range has less than 100 events, exclude that eta range
-    if (canvas_ctr <= 12) c15->Divide(3,4);
-    else c15->Divide(3,5);
-    */
-    for(int i=0; i<14; i++){ //CHANGE UPPER BOUND TO CANVAS_CTR
-        // cout << "iteration: " << i << endl;
-        // cout << st_dev[1][1] << ", " << st_dev[5][5] << endl;
-
-        if (i==0 || i==13) continue;
-
-        Double_t* EIC_x = 0;
-        EIC_x = new double[9];
-
-        Double_t* EIC_y = 0;
-        EIC_y = new double[9];
-
-        char thingy[1024];
-        // sprintf(thingy, "/project/projectdirs/alice/eyeats/out_ECCE/60610987/tracking_output/dat%i.csv", i);
-        sprintf(thingy, "dat%i.csv", i);
-        cout << "file: " << thingy << endl;
-
-        ifstream in(thingy);
-        vector<vector<double>> fields;
-
-        if (in) {
-            string line;
-            while (getline(in, line)) {
-                stringstream sep(line);
-                string field;
-                // cout << line << endl;
-
-                fields.push_back(vector<double>());
-
-                while (getline(sep, field, ',')) {
-                    fields.back().push_back(stod(field));
-                }
-            }
-        }
-
-        // for (auto row : fields) {
-        //     for (auto field : row) {
-        //         cout << field << ' '; //PRINTS
-        //     }
-        //     cout << '\n';
-        // }
-
-        for (int a=0; a<9; a++){
-            EIC_x[a] = fields[a][0];
-            EIC_y[a] = fields[a][1];
-        }
-        // EICPlots[i] = new TGraph(9, EIC_x, EIC_y);
-        in.close();  
-        in.clear();
-
-
-        //save PWG requirements
-        char ecceintnotefilename[1024];
-        sprintf(ecceintnotefilename, "datafiles/data_mom_res_ECCE_intnote_eta%s-%s.dat", etachars[i], etachars[i+1]);
-
-        ofstream outdata; // outdata is like cin
-        outdata.open(ecceintnotefilename); // opens the file
-        if( !outdata ) { // file couldn't be opened
-            cerr << "Error: file could not be opened" << endl;
-            exit(1);
-        }
-
-        for (int a=0; a<9; a++)
-            outdata << fields[a][0] << " " << fields[a][1] << endl;
-        outdata.close();
-
-
-        /*
-        momPlots_by_p[i] = new TGraph(n,p,st_dev[i]);
-        momPlots_by_p_direct[i] = new TGraph(n,p,st_dev_direct[i]);
-
-        double* dp_p = calculatePWGreqs(i, p);
-        pwg_req_eqs[i] = new TGraph(n,p,dp_p);
-
-        c15->cd(i); //CHANGED FROM ORIGINAL i+1
-        TMultiGraph *mg = new TMultiGraph();
-        mg->Add(momPlots_by_p[i]);
-        mg->Add(EICPlots[i]);
-	    mg->Add(pwg_req_eqs[i]);
-        mg->Add(momPlots_by_p_direct[i]);
-        mg->Draw("ALP"); //"ACP"
-
-        momPlots_by_p[i]->SetLineColor(4);
-        momPlots_by_p[i]->SetMarkerColor(4);
-        momPlots_by_p[i]->SetMarkerStyle(2);
-        momPlots_by_p_direct[i]->SetLineColor(2);
-        momPlots_by_p_direct[i]->SetMarkerColor(2);
-        momPlots_by_p_direct[i]->SetMarkerStyle(5);
-        EICPlots[i]->SetLineColor(8);
-        EICPlots[i]->SetMarkerColor(8);
-        EICPlots[i]->SetMarkerStyle(4);
-
-        mg->GetXaxis()->SetTitle("Track p [GeV/c]");
-        mg->GetYaxis()->SetTitle("#Deltap/p");
-        mg->GetXaxis()->CenterTitle();
-        mg->GetYaxis()->CenterTitle();
-        mg -> GetXaxis() -> SetNdivisions(107);
-        mg -> GetXaxis() -> SetTitleSize(0.05);
-        mg -> GetXaxis() -> SetLabelSize(0.05);
-        mg -> GetYaxis() -> SetNdivisions(107);
-        mg -> GetYaxis() -> SetTitleSize(0.05);
-        mg -> GetYaxis() -> SetLabelSize(0.05);
-
-        etalabels[i]->SetTextFont(43); etalabels[i]->SetTextSize(18);
-        etalabels[i]->Draw("same");
-	
-        auto legend = new TLegend(0.1,.7,0.48,0.9);
-        legend->SetHeader("The Legend Title","C"); // option "C" allows to center the header
-        legend->AddEntry(momPlots_by_p_direct[i],"Momentum Plots By P","l");
-        legend->AddEntry(EICPlots[i],"ECCE Paper Plots","l");
-        legend->AddEntry(pwg_req_eqs[i],"PWG Requirement Equations","l");
-        legend->Draw();
-        */
-    }
     /*
     c15->Print("plots/mom_res_SD_by_p.pdf");
 
@@ -465,6 +517,10 @@ void plotMomRes(int nEntries){
     int ctr[14];
     int max[14];
     int savei[14];
+    int maxphi[14];
+    int maxtheta[14];
+    int maxlongDCA[14];
+    int maxtransDCA[14];
 
 
     //fill histograms based on the bins
@@ -476,6 +532,10 @@ void plotMomRes(int nEntries){
         float eta = calculateEta(px,py,pz);
         float p = calculateP(px,py,pz);
         float momRes = calculateMomRes(gpx,gpy,gpz,px,py,pz);
+        float phiRes = calculatePhiRes(gpx,gpy,gpz,px,py,pz);
+        float thetaRes = calculateThetaRes(gpx,gpy,gpz,px,py,pz);
+        float longDCARes = calculateLongDCA(pcaz,gvz); //a DCA
+        float transDCARes = dca2d; // r-phi DCA
         
 
         if (i<10) cout << "p for " <<i << " is " << px << ", " << py << ", " << pz << " --> " << p << endl;
@@ -491,7 +551,19 @@ void plotMomRes(int nEntries){
                         max[i] = momRes;
                         savei[i] = i;
                     }
-                    if (p > j*2 && p <= j*2+2) mom_res_preliminary_hists[i][j]->Fill(momRes); //does comparison have to be a double?
+                    if (phiRes > maxphi[i]) maxphi[i] = phiRes;
+                    if (thetaRes > maxtheta[i]) maxtheta[i] = thetaRes;
+                    if (longDCARes > maxlongDCA[i]) maxlongDCA[i] = longDCARes;
+                    if (transDCARes > maxtransDCA[i]) maxtransDCA[i] = transDCARes;
+
+
+                    if (p > j*2 && p <= j*2+2) {
+                        mom_res_preliminary_hists[i][j]->Fill(momRes); //does comparison have to be a double?
+                        phi_res_preliminary_hists[i][j]->Fill(phiRes);
+                        theta_res_preliminary_hists[i][j]->Fill(thetaRes);
+                        longDCA_res_preliminary_hists[i][j]->Fill(longDCARes);
+                        transDCA_res_preliminary_hists[i][j]->Fill(transDCARes);
+                    }
                 }
             }
         }
@@ -514,19 +586,41 @@ void plotMomRes(int nEntries){
     cout << "MAX VALS PER ETA (event#: max resolution)" << endl;
     for(int i=0; i<14; i++){
         cout << savei[i] << ": " << max[i] << endl;
+        cout << "max phi " << i << ": " << maxphi[i] << endl;
+        cout << "max theta " << i << ": " << maxtheta[i] << endl;
+        cout << "max longDCA " << i << ": " << maxlongDCA[i] << endl;
+        cout << "max transDCA " << i << ": " << maxtransDCA[i] << endl;
     }
 
 
 
     //calculate standard deviations
     Double_t** st_dev_direct = 0;
+    Double_t** phi_st_dev_direct = 0;
+    Double_t** theta_st_dev_direct = 0;
+    Double_t** longDCA_st_dev_direct = 0;
+    Double_t** transDCA_st_dev_direct = 0;
     st_dev_direct = new double*[14]; //[eta range][p range] in order from min to max (neg->pos)
+    phi_st_dev_direct = new double*[14];
+    theta_st_dev_direct = new double*[14];
+    longDCA_st_dev_direct = new double*[14];
+    transDCA_st_dev_direct = new double*[14];
     for (int i=0; i<14; i++){
         st_dev_direct[i] = new double[10];
+        phi_st_dev_direct[i] = new double[10];
+        theta_st_dev_direct[i] = new double[10];
+        longDCA_st_dev_direct[i] = new double[10];
+        transDCA_st_dev_direct[i] = new double[10];
         for (int j=0; j<10; j++){
             st_dev_direct[i][j] = mom_res_preliminary_hists[i][j]->GetStdDev();
+            phi_st_dev_direct[i][j] = phi_res_preliminary_hists[i][j]->GetStdDev();
+            theta_st_dev_direct[i][j] = theta_res_preliminary_hists[i][j]->GetStdDev();
+            longDCA_st_dev_direct[i][j] = longDCA_res_preliminary_hists[i][j]->GetStdDev();
+            transDCA_st_dev_direct[i][j] = transDCA_res_preliminary_hists[i][j]->GetStdDev();
         }
     }
+
+    cout << "Preliminary histograms made" << endl;
 
 
     //make fits
@@ -554,6 +648,28 @@ void plotMomRes(int nEntries){
             char title_direct[1024];
             sprintf(title_direct, "mom_res_eta%s-%s_p%d-%d_direct_rebinned", etachars[i], etachars[i+1], j*2, j*2+2);
             mom_res_hists_direct[i][j] = new TH1F(title_direct, label, 100, -3*st_dev_direct[i][j], 3*st_dev_direct[i][j]);
+
+            char phititle[1024];
+            sprintf(phititle, "phi_res_eta%s-%s_p%d-%d_direct_rebinned", etachars[i], etachars[i+1], j*2, j*2+2);
+            char philabel[1024];
+            sprintf(philabel, ";d#phi, %f < #eta < %f, %d < p < %d", etavals[i], etavals[i+1], j*2, j*2+2);
+            phi_res_hists[i][j] = new TH1F(phititle, philabel, 100, -3*phi_st_dev_direct[i][j], 3*phi_st_dev_direct[i][j]);
+            char thetatitle[1024];
+            sprintf(thetatitle, "theta_res_eta%s-%s_p%d-%d_direct_rebinned", etachars[i], etachars[i+1], j*2, j*2+2);
+            char thetalabel[1024];
+            sprintf(thetalabel, ";d#theta, %f < #eta < %f, %d < p < %d", etavals[i], etavals[i+1], j*2, j*2+2);
+            theta_res_hists[i][j] = new TH1F(thetatitle, thetalabel, 100, -3*theta_st_dev_direct[i][j], 3*phi_st_dev_direct[i][j]);
+            char longDCAtitle[1024];
+            sprintf(longDCAtitle, "longDCA_res_eta%s-%s_p%d-%d_direct_rebinned", etachars[i], etachars[i+1], j*2, j*2+2);
+            char longDCAlabel[1024];
+            sprintf(longDCAlabel, ";z DCA, %f < #eta < %f, %d < p < %d", etavals[i], etavals[i+1], j*2, j*2+2);
+            longDCA_res_hists[i][j] = new TH1F(longDCAtitle, longDCAlabel, 100, -3*longDCA_st_dev_direct[i][j], 3*phi_st_dev_direct[i][j]);
+            char transDCAtitle[1024];
+            sprintf(transDCAtitle, "transDCA_res_eta%s-%s_p%d-%d_direct_rebinned", etachars[i], etachars[i+1], j*2, j*2+2);
+            char transDCAlabel[1024];
+            sprintf(transDCAlabel, ";r-#phi DCA, %f < #eta < %f, %d < p < %d", etavals[i], etavals[i+1], j*2, j*2+2);
+            transDCA_res_hists[i][j] = new TH1F(transDCAtitle, transDCAlabel, 100, -3*transDCA_st_dev_direct[i][j], 3*phi_st_dev_direct[i][j]);
+
         }
     }
 
@@ -567,6 +683,10 @@ void plotMomRes(int nEntries){
         float eta = calculateEta(px,py,pz);
         float p = calculateP(px,py,pz);
         float momRes = calculateMomRes(gpx,gpy,gpz,px,py,pz);
+        float phiRes = calculatePhiRes(gpx,gpy,gpz,px,py,pz);
+        float thetaRes = calculateThetaRes(gpx,gpy,gpz,px,py,pz);
+        float longDCARes = calculateLongDCA(pcaz,gvz); //a DCA
+        float transDCARes = dca2d; // r-phi DCA
 
         for (int i=0; i<14; i++){
             for (int j=0; j<10; j++){
@@ -574,6 +694,10 @@ void plotMomRes(int nEntries){
                     if (p > j*2 && p <= j*2+2) {
                         mom_res_hists[i][j]->Fill(momRes); //does comparison have to be a double?
                         mom_res_hists_direct[i][j]->Fill(momRes);
+                        phi_res_hists[i][j]->Fill(phiRes);
+                        theta_res_hists[i][j]->Fill(thetaRes);
+                        longDCA_res_hists[i][j]->Fill(longDCARes);
+                        transDCA_res_hists[i][j]->Fill(transDCARes);
                     }
                 }
             }
@@ -583,7 +707,13 @@ void plotMomRes(int nEntries){
     Double_t** st_dev_final_fromfit = makeFits(mom_res_hists, st_dev_fromfit);
     Double_t** st_dev_final_direct = makeFits(mom_res_hists, st_dev_direct);
 
+    Double_t** phi_st_dev_final = makeFits(phi_res_hists, phi_st_dev_direct);
+    Double_t** theta_st_dev_final = makeFits(theta_res_hists, theta_st_dev_direct);
+    Double_t** longDCA_st_dev_final = makeFits(longDCA_res_hists, longDCA_st_dev_direct);
+    Double_t** transDCA_st_dev_final = makeFits(transDCA_res_hists, transDCA_st_dev_direct);
 
+
+    cout << "About to draw histograms to canvas" << endl;
 
     //make canvas to draw
     vector<TCanvas*> canvas(14);
@@ -610,14 +740,81 @@ void plotMomRes(int nEntries){
 
         }
         char outname[1024];
-        sprintf(outname, "plots/%s/mom_res_etan%s-%s_bins100_rebinned.pdf", configuration, etachars[i], etachars[i+1]);
+        sprintf(outname, "plots/%s/mom_res_eta%s-%s_bins100_rebinned.pdf", configuration, etachars[i], etachars[i+1]);
         canvas[i]->Print(outname);
     }
+
+
+    //make other canvases to draw
+    vector<TCanvas*> phicanvas(14);
+    vector<TCanvas*> thetacanvas(14);
+    vector<TCanvas*> longDCAcanvas(14);
+    vector<TCanvas*> transDCAcanvas(14);
+    for (int i=0; i<14; i++){
+        char phi_canvas_title[1024]; sprintf(phi_canvas_title, "c%d phi", i);
+        phicanvas[i] = new TCanvas(phi_canvas_title,phi_canvas_title,1200,900);
+        phicanvas[i]->Divide(5,2);
+        char theta_canvas_title[1024]; sprintf(theta_canvas_title, "c%d theta", i);
+        thetacanvas[i] = new TCanvas(theta_canvas_title,theta_canvas_title,1200,900);
+        thetacanvas[i]->Divide(5,2);
+        char longDCA_canvas_title[1024]; sprintf(longDCA_canvas_title, "c%d longDCA", i);
+        longDCAcanvas[i] = new TCanvas(longDCA_canvas_title,longDCA_canvas_title,1200,900);
+        longDCAcanvas[i]->Divide(5,2);
+        char transDCA_canvas_title[1024]; sprintf(transDCA_canvas_title, "c%d transDCA", i);
+        transDCAcanvas[i] = new TCanvas(transDCA_canvas_title,transDCA_canvas_title,1200,900);
+        transDCAcanvas[i]->Divide(5,2);
+
+        for (int j=0; j<10; j++){
+            phicanvas[i]->cd(j+1);
+            phi_res_hists[i][j]->Draw();
+            thetacanvas[i]->cd(j+1);
+            theta_res_hists[i][j]->Draw();
+            longDCAcanvas[i]->cd(j+1);
+            longDCA_res_hists[i][j]->Draw();
+            transDCAcanvas[i]->cd(j+1);
+            transDCA_res_hists[i][j]->Draw();
+
+        }
+        char phioutname[1024];
+        sprintf(phioutname, "plots/%s/phi_res_eta%s-%s_bins100_rebinned.pdf", configuration, etachars[i], etachars[i+1]);
+        phicanvas[i]->Print(phioutname);
+        char thetaoutname[1024];
+        sprintf(thetaoutname, "plots/%s/theta_res_eta%s-%s_bins100_rebinned.pdf", configuration, etachars[i], etachars[i+1]);
+        thetacanvas[i]->Print(thetaoutname);
+        char longDCAoutname[1024];
+        sprintf(longDCAoutname, "plots/%s/longDCA_res_eta%s-%s_bins100_rebinned.pdf", configuration, etachars[i], etachars[i+1]);
+        longDCAcanvas[i]->Print(longDCAoutname);
+        char transDCAoutname[1024];
+        sprintf(transDCAoutname, "plots/%s/transDCA_res_eta%s-%s_bins100_rebinned.pdf", configuration, etachars[i], etachars[i+1]);
+        transDCAcanvas[i]->Print(transDCAoutname);
+
+    }
+
+
+    // for (int i=0; i<14; i++){
+    //     for (int j=0; j<10; j++){
+    //         canvas[i]->cd(j+1);
+    //         // mom_res_preliminary_hists[i][j]->Draw();
+    //         mom_res_hists[i][j]->Draw();
+
+    //         // canvas_direct[i]->cd(j+q);
+    //         // mom_res_hists_direct[i]->Draw();
+
+    //     }
+    //     char outname[1024];
+    //     sprintf(outname, "plots/%s/mom_res_etan%s-%s_bins100_rebinned.pdf", configuration, etachars[i], etachars[i+1]);
+    //     canvas[i]->Print(outname);
+    // }
     
 
 
     //plot SD
-    plotSD(st_dev_final_fromfit, st_dev_final_direct, canvas_ctr);
+    // plotSD(st_dev_final_fromfit, st_dev_final_direct, canvas_ctr);
+    plotSD(st_dev_final_direct, canvas_ctr);
+    plotSD(phi_st_dev_final, canvas_ctr, 1);
+    plotSD(theta_st_dev_final, canvas_ctr, 2);
+    plotSD(longDCA_st_dev_final, canvas_ctr, 3);
+    plotSD(transDCA_st_dev_final, canvas_ctr, 4);
 
 }
 
@@ -637,6 +834,9 @@ void plotMomentumResolution(){
     tree->SetBranchAddress("px", &px);
     tree->SetBranchAddress("py", &py);
     tree->SetBranchAddress("pz", &pz);
+    tree->SetBranchAddress("dca2d", &dca2d);
+    tree->SetBranchAddress("pcaz", &pcaz);
+    tree->SetBranchAddress("gvz", &gvz);
 
     
     const int nEntries = tree->GetEntries();
